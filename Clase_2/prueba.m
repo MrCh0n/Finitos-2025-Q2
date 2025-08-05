@@ -27,11 +27,14 @@ valores.coord = Coord;
 valores.elem = Elem;
 
 valores
-valores.coord(2, :)
+
+
+fields = fieldnames(valores)
+fields{1}
+valores.(fields{1})(2, :)
 
 valores = rmfield(valores, 'elem');
 
-valores
 
 syms x L
 X = [1 x x^2 x^3];
