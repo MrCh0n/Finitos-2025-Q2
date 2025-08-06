@@ -3,44 +3,24 @@ clear;
 
 valores = struct;
 
-Coord = [0 0;
-    1 0;
-    2 0;
-    0 1;
-    1 1;
-    2 1]; %coordenadas x y de los nodos
-%Coord = [0 0; 1 0; 0 1];
+valores.coord = [0 0;
+                 6 0;
+                 12 0;
+                 18 0];
 
+E = 210e9;
+I = 700e-6;
+valores.elem = [1 2 E I;
+                2 3 E I;
+                3 4 E 2*I];
 
-Elem = [1 2;
-    2 3;
-    1 4;
-    2 4;
-    2 5;
-    2 6;
-    3 6;
-    4 5;
-    5 6]; %referir a que nodos estan conectados los elementos
-%Elem = [1 2; 2 3; 3 1];
+valores.BC = [1 2 5];
 
-valores.coord = Coord;
-valores.elem = Elem;
+valores.Fnodos = [1 -30000;
+                  2 -30000;
+                  3 -60000;
+                  5 -30000;
+                  6 30000;
+                  7 -100000];
 
-valores
-
-
-fields = fieldnames(valores)
-fields{1}
-valores.(fields{1})(2, :)
-
-valores = rmfield(valores, 'elem');
-
-
-syms x L
-X = [1 x x^2 x^3];
-A = [subs(X, x ,0)
-     subs(diff(X,x), x, 0)
-     subs(X, x, L)
-     subs(diff(X,x), x, L)];
-
-N = X/A;
+vigas(valores);
