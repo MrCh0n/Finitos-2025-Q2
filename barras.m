@@ -15,13 +15,9 @@ campos = fieldnames(sistema);
 
 Coord = sistema.(campos{1});
 Elem = sistema.(campos{2});
-BC = sistema.(campos{3});
-Fnodos = sistema.(campos{4});
-
-
-E = 200e9; %en Pa
-
-A = 50e-6; % en m^2 pueden ser matrices (diferente para cada elemento)
+prop = sistema.(campos{3});
+BC = sistema.(campos{4});
+Fnodos = sistema.(campos{5});
 
 %armar la matriz
 nnod = size(Coord,1); %cant de nodos
@@ -33,6 +29,9 @@ for i=1:nelem
     %matriz de rigidez
     V =Coord(Elem(i,2),:)-Coord(Elem(i,1),:); %vector del elemento
     L = norm(V);
+    E = prop(i,1);
+    A = prop(i,2);
+
     Kel = A*E/L *[1 -1;-1 1];
     
     %giro la matriz
@@ -76,6 +75,7 @@ for i=1:nelem
     
     V =Coord(Elem(i,2),:)-Coord(Elem(i,1),:); %vector del elemento
     L = norm(V);
+    E = prop(i,1);
     Bel = [-1/L 1/L];
     
     %giro la matriz
@@ -94,7 +94,6 @@ for i=1:nelem
     Stress(i) = E*Bel*D_local; 
 
 end
-
 a = 50; %amplificar la deformacion
 
 %% Graficar

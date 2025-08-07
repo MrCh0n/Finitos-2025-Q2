@@ -50,7 +50,7 @@ end
 Rreducido = R(Libres);
 
 U = zeros(ndof, 1);
-U(Libres) = Kreducido\Rreducido;
+U(Libres) = Kreducido\Rreducido
 
 %TODO hacer el B
 syms x L
