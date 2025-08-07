@@ -7,16 +7,13 @@ Elem = sistema.(campos{2});
 BC = sistema.(campos{3});
 Fnodos = sistema.(campos{4});
 
-%TODO crear la matriz global y la reducida
-%armar la matriz
-% E = 200e9;
-% I = 700e-6;
 
 nnod = size(Coord,1); %cant de nodos
 ndof = 2*nnod; %degrees of freedom
 nelem = size(Elem,1); %cantidad de elementos
 K = zeros(ndof);
 
+%armar la matriz K
 for i = 1:nelem
     V = (Coord(Elem(i, 2),:) - Coord(Elem(i, 1),:));
     L = norm(V);
@@ -65,4 +62,28 @@ A = [subs(X, x ,0)
 
 N = X/A;
 
-%TODO hacer el plot y las tensiones
+%TODO las tensiones
+
+divisiones = 6;
+def = [];
+Largo = [];
+
+for i = 1:nelem
+    V = (Coord(Elem(i, 2),:) - Coord(Elem(i, 1),:));
+    Le = norm(V);
+
+    dir = [Elem(i,1)*2-1 Elem(i,1)*2 Elem(i,2)*2-1 Elem(i,2)*2];
+
+    Uloc = U(dir);
+
+    Vy = subs(N, L, Le)*Uloc;   
+
+    Inicio = Coord(Elem(i,1), 1);
+
+    for i = 0:Le/divisiones:Le;
+        def = [def subs(Vy, x, i)];
+        Largo = [Largo Inicio+i];
+    end
+end
+
+plot(Largo, def);
