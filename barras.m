@@ -1,4 +1,4 @@
-function [] = barras(sistema)
+function [U, reacciones] = barras(sistema)
 % funcion que crea y grafica reticulado de elementos barra
 % sistema es un stuct con 4 campos
 %   el primer campo son las coordenadas de los nodos
@@ -66,7 +66,7 @@ U(Libres) = Kreducida\Rreducida; %matriz\vector es inversa de matriz * vector
 
 
 %% Calcular fuerzas y tensiones
-F = K*U; 
+F = K*U;
 sum(F); %comprobar que sumatoria de fuerzas y reacciones de 0
 
 %Calcular tensiones (a chequear)
@@ -94,7 +94,20 @@ for i=1:nelem
     Stress(i) = E*Bel*D_local; 
 
 end
-a = 50; %amplificar la deformacion
+
+reacciones = F-R;
+
+Q = sistema.(campos{6});
+U = reshape(U,2,[])';
+for i = 1:size(Coord,1)
+    reacciones([2*i-1 2*i]) = Q'*reacciones([2*i-1 2*i]);
+    U(i,:) = Q'*U(i,:)';
+    Coord(i,:) = Q'*Coord(i,:)';
+end
+U = reshape(U',[],1);
+
+
+a = 500; %amplificar la deformacion
 
 %% Graficar
 plot(Coord(:,1),Coord(:,2),'k*')
