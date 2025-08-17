@@ -1,0 +1,168 @@
+clc
+clear
+
+q_max = 300000; %N/m
+q_min = 0;
+
+q = (q_max-q_min)/8;
+
+E = 210e9; %Pa
+I = 0.5*1e-4; %m^4
+A = 0.5*1e-2; %m^2
+
+mesh.nodes = [0 0;
+              0 4;
+              0 8; 
+              10 4;
+              10 8];
+
+mesh.elem = [1 2;
+             2 3;
+             2 4;
+             3 5];
+
+nnod = size(mesh.nodes, 1);
+ndof = 3*nnod; %3 porque tengo u,v,tita
+nelem = size(mesh.elem,1);
+
+mesh.dofs = reshape(1:ndof, 3, [])';
+
+mesh.Libres = true(nnod, 3);
+empotrados = [1 4 5];
+mesh.Libres(empotrados,:) = false;
+
+mesh.Libres = reshape(mesh.Libres', [], 1);
+
+R = zeros(ndof,1);
+for i = 1:2
+    nodo1 = mesh.elem(i,1);
+    nodo2 = mesh.elem(i,2);
+    q_alto = q*(8-mesh.nodes(nodo1, 2));
+    q_bajo = q*(8-mesh.nodes(nodo2, 2));
+    w = q_alto-q_bajo;
+    P1 = (-7*w/20-q_bajo/2)*4;
+    P2 = (-3*w/20-q_bajo/2)*4;
+    M1 = (-w/20-q_bajo/12)*4^2;
+    M2 = (+w/30+q_bajo/12)*4^2;
+    
+    dir = [mesh.dofs(nodo1,:) mesh.dofs(nodo2,:)];
+    R(dir) = R(dir) + [-P1; 0; M1; -P2; 0; M2];
+end
+
+T = zeros(6);
+K = zeros(ndof);
+Kloc = zeros(6);
+for i = 1:nelem
+    nodo1 = mesh.elem(i,1);
+    nodo2 = mesh.elem(i,2);
+
+    V = mesh.nodes(nodo2,:) - mesh.nodes(nodo1,:);
+    L = norm(V);
+
+    Kel_bar = A*E/L *[1 -1;-1 1];
+    
+    Y1 = 12*E*I/L^3;
+    Y2 = 6*E*I/L^2;
+    Y3 = 4*E*I/L;
+    Y4 = 2*E*I/L;
+
+    Kel_vig = [Y1 Y2 -Y1 Y2;
+           Y2 Y3 -Y2 Y4;
+           -Y1 -Y2 Y1 -Y2;
+           Y2 Y4 -Y2 Y3];
+
+    dir_bar = [1 4];
+    dir_vig = [2 3 5 6];
+
+    Kloc(dir_bar, dir_bar) = Kel_bar;
+    Kloc(dir_vig, dir_vig) = Kel_vig;
+
+    cs = V/L;
+    c = cs(1);
+    s = cs(2);
+
+    Q = [c s 0;
+         -s c 0;
+         0 0 1];
+    T(1:3, 1:3) = Q;
+    T(4:6, 4:6) = Q;
+    
+    Kglob = T'*Kloc*T;
+    dir = [mesh.dofs(nodo1,:) mesh.dofs(nodo2,:)];
+    K(dir,dir) = K(dir,dir) + Kglob;
+end
+
+Rr = R(mesh.Libres);
+Kr = K(mesh.Libres, mesh.Libres);
+
+U = zeros(ndof,1);
+U(mesh.Libres) = Kr\Rr;
+
+
+%% Grafico de dezplasamientos
+divisiones = 20;
+Nloc = zeros(2*divisiones,6);
+mult = 100; %multiplica los desplazamientos
+
+plot(mesh.nodes(:,1), mesh.nodes(:,2), 'k*');
+hold on
+
+todo = mult*reshape(U,3,nnod)';
+deformada = mesh.nodes + todo(:, [1 2]);
+plot(deformada(:,1), deformada(:,2), 'bo');
+for i = 1:nelem
+    nodo1 = mesh.elem(i,1);
+    nodo2 = mesh.elem(i,2);
+
+    V = mesh.nodes(nodo2,:) - mesh.nodes(nodo1,:);%vector de direccion
+    L = norm(V);
+
+    %cosenos directores
+    cs = V/L;
+    c = cs(1);
+    s = cs(2);
+  
+    %matriz de rotacion
+    Q = [c s 0;
+         -s c 0;
+         0 0 1];
+    T(1:3, 1:3) = Q;
+    T(4:6, 4:6) = Q;
+
+    dir = [mesh.dofs(nodo1,:) mesh.dofs(nodo2,:)];
+   
+    Uloc =  T*U(dir);
+    
+    %creo la matrix de N    
+    x = linspace(0,L, divisiones);
+    
+    dir_bar = [1 4];
+    dir_vig = [2 3 5 6];
+    
+    Nel_bar = [L-x; x]'/L;
+    Nel_vig = [(L^3 - 3*L*x.^2 + 2*x.^3)/L^3;
+               (L^2*x - 2*L*x.^2 + x.^3)/L^2;
+               (- 2*x.^3 + 3*L*x.^2)/L^3;
+               -(- x.^3 + L*x.^2)/L^2]';
+
+    Nloc(1:2:2*divisiones,dir_bar) = Nel_bar;
+    Nloc(2:2:2*divisiones,dir_vig) = Nel_vig;
+    
+    %crea los desplazamientos u,v locales del elemento
+    %mult amplifica la deformacion
+    Udiv = reshape(Nloc*Uloc,2,divisiones)'*mult;
+    
+    %para crear los puntos iniciales de las divisiones
+    inicial = mesh.nodes(nodo1,:);
+    final = mesh.nodes(nodo2,:);
+    deltaL = (final-inicial)/(divisiones-1);
+    
+    Q = [c s;
+         -s c];%para girar al global
+    for j = 1:divisiones
+        Udiv(j,:) = (Q'*Udiv(j,:)')' + inicial + deltaL*(j-1); %lo giro al global y le sumo su punto inicial
+    end
+
+    plot(Udiv(:,1), Udiv(:,2))
+end
+hold off

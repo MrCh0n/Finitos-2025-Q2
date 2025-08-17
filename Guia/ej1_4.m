@@ -49,4 +49,4 @@ mesh.Fnod = [1 P1(1);
              6 P3(2)];
 
 mesh.Fnod(:,2) = mesh.Fnod(:,2)/0.225;
-barras(mesh);
+barras(mesh)

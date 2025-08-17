@@ -60,3 +60,5 @@ Kr = K(Libres, Libres);
 
 U = zeros(ndof_per*nnod,1);
 U(Libres) = Kr\Rr;
+
+U = [U(1:4); U(3); U(5:9); U(8); U(10:12)]
