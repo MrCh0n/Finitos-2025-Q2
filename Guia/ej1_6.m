@@ -31,7 +31,7 @@ Libres(nnod,:) = false;
 Libres = reshape(Libres',1,[]);
 
 R = zeros(ndof_per*nnod,1);
-R(6) = -P;
+%R(6) = -P;
 
 K = zeros(ndof_per*nnod);
 
@@ -53,12 +53,19 @@ for i = 1:nelem
 
     K(dir, dir) = K(dir, dir) + Kel;
 end
+U = zeros(ndof_per*nnod,1);
+U(6) = -0.25/1e3;
+Libres(6) = 0;
 
+R = R - K*U;
 Rr = R(Libres);
 
 Kr = K(Libres, Libres);
 
-U = zeros(ndof_per*nnod,1);
-U(Libres) = Kr\Rr;
+%U = zeros(ndof_per*nnod,1);
+%U(6) = 0.25/1e3;
 
-U = [U(1:4); U(3); U(5:9); U(8); U(10:12)]
+U(Libres) = U(Libres) + Kr\Rr;
+U*1000
+K*U %el 6 es P
+U = [U(1:4); U(3); U(5:9); U(8); U(10:12)];
