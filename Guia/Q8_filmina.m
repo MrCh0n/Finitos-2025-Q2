@@ -5,7 +5,7 @@ P = 1000;
 L = 5;
 M = 1;
 
-E = 200;
+E = 200e9;
 v = 0.3;
 t = 0.05;
 
@@ -61,7 +61,7 @@ for i = 1:nelem
 
    Kloc = crearK_Q8(coord_nodos, C);
 
-    dir = reshape(mesh.dofs(dir_nod,:)',[],1);
+    dir = mesh.dofs(dir_nod,:)';
 
     K(dir,dir) = K(dir,dir) + Kloc;
 end
@@ -74,12 +74,6 @@ U = zeros(ndof,1);
 U(mesh.Libres) = Kr\Rr;
 
 divisiones = 20;
-Nloc = zeros(2*divisiones,6);
-mult = 100000; %multiplica los desplazamientos
+mult = 10000; %multiplica los desplazamientos
 
-plot(mesh.nodes(:,1), mesh.nodes(:,2), 'k*');
-hold on
-
-todo = mult*reshape(U,2,nnod)';
-deformada = mesh.nodes + todo;
-plot(deformada(:,1), deformada(:,2), 'bo');
+plotQ8(mesh.nodes,mesh.elem, mesh.dofs, U, divisiones, mult)

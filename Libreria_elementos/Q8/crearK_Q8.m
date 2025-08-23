@@ -5,16 +5,16 @@ arguments (Input)
    nodos(8,2) {mustBeNumeric}
    C(3,3) {mustBeNumeric}
 end
-syms x y
+% syms x y
 
 xmin = min(nodos(:,1));
 xmax = max(nodos(:,1));
 ymin = min(nodos(:,2));
 ymax = max(nodos(:,2));
 
-X = [1 x y x^2 x*y y^2 x^2*y y^2*x];
-Xx = diff(X,x);
-Xy = diff(X,y);
+% X = [1 x y x^2 x*y y^2 x^2*y y^2*x];
+% Xx = diff(X,x);
+% Xy = diff(X,y);
 
 %A sin syms
 x1 = nodos(:,1);
@@ -24,12 +24,13 @@ A = [one x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
 
 A = inv(A);
 %% GAUSS
-tic
 puntos = [-sqrt(3/5) 0 sqrt(3/5)];
 w = [5/9 8/9 5/9];
+resizex = (xmax-xmin)/2;
+resizey = (ymax-ymin)/2;
 
-x2 = (puntos+1)*(xmax-xmin)/2 + xmin;
-y2 = (puntos+1)*(ymax-ymin)/2 + ymin;
+x2 = ((puntos+1)*resizex + xmin);
+y2 = ((puntos+1)*resizey + ymin);
 integral = 0;
 for i = 1:3
     for j = 1:3
@@ -43,29 +44,29 @@ for i = 1:3
         B(3,dir1) = By;
         B(3,dir2) = Bx;
 
-        integral = integral + B'*C*B*w(i)*w(j);
+        integral = integral + B'*C*B*w(i)*w(j)*resizey*resizex;
     end%for j
 end%for i
-toc
 
 %% Syms
-Bx = Xx*A;
-By = Xy*A;
+% Bx = Xx*A;
+% By = Xy*A;
+% 
+% B=[];
+% for i = 1:8
+%     dx = Bx(i);
+%     dy = By(i);
+%     Bfila = [dx 0; 0 dy; dy dx];
+%     B = [B Bfila];
+% end
+% 
+% integrando = (B'*C*B);
+% 
+% tic
+% 
+% K = int(int(integrando, x, xmin, xmax), y, ymin, ymax);
+% 
+% toc
+K = integral;
 
-B=[];
-for i = 1:8
-    dx = Bx(i);
-    dy = By(i);
-    Bfila = [dx 0; 0 dy; dy dx];
-    B = [B Bfila];
-end
-
-integrando = B'*C*B;
-
-tic
-K = int(int(integrando, x, xmin, xmax), y, ymin, ymax);
-
-toc
-K = eval(K);
-(integral-K)./K
 end
