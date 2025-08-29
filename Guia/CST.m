@@ -1,7 +1,7 @@
 clc
 clear
 
-a = 1;
+a = 2;
 
 n = 3*a+1;%tiene que ser multiplo de 3 + 1
 m = 2*a+1;%para que quede cuadrado

@@ -44,7 +44,7 @@ Ylabel = ['Sress XX [MPa]';
         'Sress YY [MPa]';
         'Sress XY [MPa]'];
 hold off
-for j = 1:3
+for j = 1
     figure(j);
 
     for i = 1:nelem

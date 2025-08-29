@@ -1,5 +1,13 @@
 function [K] = crearK_viga_barra(nodos,E,A,I)
 %crea la K local a los nodos dados
+%
+%K = crearK_viga_barra(nodos, E, A, I)
+%
+%nodos es una lista (x, y) de los 2 nodos del elemento
+%E es el modulo de Young del materia
+%A es el area de la seccion
+%I es el momento de Inercia de la seccion
+
     V = nodos(2,:) - nodos(1,:);
     L = norm(V);
 
