@@ -51,10 +51,14 @@ for i = 1:orden
         J = [Neta; Nzeta]*nodos;%el jacobiaos para el punto de Gauss
 
         J1 = inv(J);%el inverso para hacer B
+        D = [Neta; Nzeta]';
+        pruebaB = D/J;
     
         Bx = Neta*J1(1,1) + Nzeta*J1(1,2);%transforma las derivadas a x
         By = Neta*J1(2,1) + Nzeta*J1(2,2);%transformo las derivadas a y
-        
+       
+        Bx = pruebaB(:,1);
+        By = pruebaB(:,2);
         dir1 = 1:2:2*cant_puntos;
         dir2 = 2:2:2*cant_puntos;
         %crear la matrz B

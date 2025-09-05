@@ -76,12 +76,13 @@ for i = 1:2
         Area = Area + subs(integrando, [x y], [puntos(i) puntos(j)]);
     end
 end
-double(Area)
+
 
 % plot(nodos(:,1), nodos(:,2),'xk')
 % hold on
 % 
-% plot(polyshape(triangulo))
+plot(polyshape(triangulo))
+hold on
 % hold off
 
 %% triangulo FST bien
@@ -101,7 +102,7 @@ triangulo = [0 0; 2 0; 0 2; 0.5 0; 0 0.5; 0.5 0.5];
 
 N2 = N*triangulo;
 
-J = [diff(N,x); diff(N,y)]*triangulo
+J = [diff(N,x); diff(N,y)]*triangulo;
 
 u = N2(1);
 v = N2(2);
@@ -113,7 +114,7 @@ for i = 1:3
         nodos(i,:) = subs(N2, [x y], [puntos(i,:)]);
         Area = Area + w(i)*subs(integrando, [x y], [puntos(i,:)]);
 end
-double(Area)
+
 
 plot(nodos(:,1), nodos(:,2),'xk')
 hold on
