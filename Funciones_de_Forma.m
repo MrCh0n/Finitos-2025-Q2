@@ -34,7 +34,7 @@ A = [subs(X, [x y], nodo1);
     1 nodo3 nodo3(1)*nodo3(2);
     1 nodo4 nodo4(1)*nodo4(2)];
 
-N = X/A;
+N = X/A
 cant_puntos = 4;
 
 Bx = diff(N,x);

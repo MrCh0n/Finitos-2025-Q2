@@ -10,4 +10,5 @@ hold on
 todo = mult*reshape(deformaciones,2,[])';
 deformada = nodos + todo;
 plot(deformada(:,1), deformada(:,2), 'bo');
+hold off
 end

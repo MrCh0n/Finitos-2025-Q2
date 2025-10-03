@@ -32,7 +32,7 @@ puntos_Q8 = [-1    -1;
 x1 = puntos_Q8(:,1);%puntos del cuadrado
 y1 = puntos_Q8(:,2);
 A = [ones(cant_puntos,1) x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
-
+A = inv(A);
 
 %% Gauss
 puntos = [-sqrt(3/5) 0 sqrt(3/5)];
@@ -40,37 +40,38 @@ w = [5/9 8/9 5/9];
 
 orden = size(puntos,2);
 
+dir1 = 1:2:2*cant_puntos;
+dir2 = 2:2:2*cant_puntos;
 B = zeros(3,2*cant_puntos);
 K = 0;
 
 for i = 1:orden
     for j = 1:orden
-        Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]/A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]/A;%derivada de N en zeta
+        Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]*A;%derivada de N en eta en los puntos de Gauss
+        Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]*A;%derivada de N en zeta
         
         J = [Neta; Nzeta]*nodos;%el jacobiaos para el punto de Gauss
 
-        J1 = inv(J);%el inverso para hacer B
+        
         D = [Neta; Nzeta]';
         pruebaB = D/J;
-    
-        Bx = Neta*J1(1,1) + Nzeta*J1(1,2);%transforma las derivadas a x
-        By = Neta*J1(2,1) + Nzeta*J1(2,2);%transformo las derivadas a y
+
+        %J1 = inv(J);%el inverso para hacer B
+        %Bx = Neta*J1(1,1) + Nzeta*J1(1,2);%transforma las derivadas a x
+        %By = Neta*J1(2,1) + Nzeta*J1(2,2);%transformo las derivadas a y
        
         Bx = pruebaB(:,1);
         By = pruebaB(:,2);
-        dir1 = 1:2:2*cant_puntos;
-        dir2 = 2:2:2*cant_puntos;
         %crear la matrz B
         B(1,dir1) = Bx;
         B(2,dir2) = By;
         B(3,dir1) = By;
         B(3,dir2) = Bx;
     
-        mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
-        Kmin = B'*C*B;%matriz a integrar
+        %mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
+        %Kmin = B'*C*B;%matriz a integrar
         
-        K = K + Kmin*mult;
+        K = K + B'*C*B*abs(det(J))*w(i)*w(j);%Kmin*mult;
 
     end% j
 end% i

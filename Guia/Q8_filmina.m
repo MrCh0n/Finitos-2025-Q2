@@ -14,7 +14,7 @@ C = t*E/(1-v^2)*[1 v 0;
                 0 0 (1-v)/2];
 
 
-nelem = 5;
+nelem = 10000;
 
 %saltos entre filas de nodos
 %33-34...52
@@ -58,7 +58,7 @@ mesh.Libres = reshape(mesh.Libres', [], 1);
 R = zeros(ndof,1);
 R(2*salto-1) = P;
 R(2*(salto+salto2)-1) = -P;
-K = zeros(ndof);
+K = spalloc(ndof,ndof,32*ndof);
 
 for i = 1:nelem
     dir_nod = mesh.elem(i,:);
@@ -74,7 +74,7 @@ end
 
 Rr = R(mesh.Libres);
 
-Kr = K(mesh.Libres, mesh.Libres);
+Kr = K(mesh.Libres, mesh.Libre
 
 U = zeros(ndof,1);
 U(mesh.Libres) = Kr\Rr;
