@@ -73,7 +73,7 @@ mesh.elems.K = {@K_viga;
                 @K_viga; %Rigidos
                 @K_viga;
                 @K_viga;
-                @K_viga;}%que tipo de elementos son
+                @K_viga};%que tipo de elementos son
 
 % generamos subdivision y transformada es un vector que indica donde fueron
 % a parar los nodos originales
@@ -195,8 +195,8 @@ Lt = 0.2;
 Kt = Gt*Ipt/Lt;
 Mt = pi*re^2*Lt*rhot/2;
 
-sectiondData(5).Kt = Kt;
-sectiondData(5).Mt = Mt;
+sectionData(5).Kt = Kt;
+sectionData(5).Mt = Mt;
 
 
 %Fuerzas
@@ -217,7 +217,7 @@ M = spalloc(ndof,ndof, 64*ndof);
 %      Wishbones---Rocker----Rigidos----
 material = [1 1 1 1 2 2 2 2 3 3 3 3];
 geometria = [1 1 1 1 2 3 5 4 1 1 1 1];
-for i=[1:12]
+for i= 1:12
     nodo1ID = mesh.elems.con(inicioElem(i),1);%agarra el primer nodo y su siguiente en los subelementos
     nodo2ID = mesh.elems.con(inicioElem(i),2);
 
@@ -227,7 +227,7 @@ for i=[1:12]
 
     funcionK = mesh.elems.K{i};
 
-    [Kel, Mel] = funcionK(SeccionData(geometria(i)), materiales(material(i)), L);
+    [Kel, Mel] = funcionK(sectionData(geometria(i)), materiales(material(i)), L);
 
 
     %giro la matriz
@@ -276,7 +276,7 @@ U(Libres) = Kreducida\Rreducida;
 R = K*U;
 
 %% Tensiones
-plot3(Nodos(:,1),Nodos(:,2),Nodos(:,3),'ko')
+plot3(mesh.nodos(:,1),mesh.nodos(:,2),mesh.nodos(:,3),'ko')
 xlabel('X (m)')
 ylabel('Y (m)')
 zlabel('Z (m)')
@@ -393,8 +393,8 @@ end
 for i = 1:12
     cantidad = 0:divisiones(i)-1;
     for j = (inicioElem(i) + cantidad)
-        nodo1ID = mesh.elems.con(inicioElem(i),1);%agarra el primer nodo y su siguiente en los subelementos
-        nodo2ID = mesh.elems.con(inicioElem(i),2);
+        nodo1ID = mesh.elems.con(j,1);%agarra el primer nodo y su siguiente en los subelementos
+        nodo2ID = mesh.elems.con(j,2);
        
         if flag_no_deformada
             Xplt = mesh.nodos([nodo1ID, nodo2ID],1);
@@ -509,7 +509,7 @@ for i=[1:4 6 8]
 
     funcionK = mesh.elems.K{i};
 
-    Kel = funcionK(SeccionData(geometria(i)), materiales(material(i)), L);
+    Kel = funcionK(sectionData(geometria(i)), materiales(material(i)), L);
 
     %giro la matriz
     dir1 = (nodo2-nodo1)/L;
@@ -676,12 +676,12 @@ function [Q] = crearQ(dir1, auxiliar)
     Q = blkdiag(lambda, lambda, lambda, lambda);
 end
 
-function [Kel, Mel] = K_Barra(seccion, material, L)
+function [Kel, Mel] = K_barra(section, material, L)
     Kel = zeros(12);
     Mel = zeros(12);
 
     E = material.E;
-    rho = material.rho
+    rho = material.rho;
     
     A = section.A;
 
@@ -701,13 +701,13 @@ function [Kel, Mel] = K_torsion(seccion, material, L)
     Mel([4 10],[4 10]) = Mt*[1 0; 0 1];
 end
 
-function [Kel, Mel] = K_viga(seccion, material, L)
+function [Kel, Mel] = K_viga(section, material, L)
     Kel = zeros(12);
     Mel = zeros(12);
 
     E = material.E;
     G = material.G;
-    rho = material.rho
+    rho = material.rho;
 
     A = section.A;
     Iz= section.Iz;
