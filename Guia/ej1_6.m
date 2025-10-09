@@ -67,5 +67,5 @@ Kr = K(Libres, Libres);
 
 U(Libres) = U(Libres) + Kr\Rr;
 U*1000
-K*U %el 6 es P
+R = K*U %el 6 es P
 U = [U(1:4); U(3); U(5:9); U(8); U(10:12)];
