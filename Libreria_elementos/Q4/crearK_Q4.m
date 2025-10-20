@@ -39,12 +39,14 @@ for i = 1:orden
         Neta = [0, 1, 0 puntos(j)]/A;
         Nzeta = [0, 0, 1, puntos(i)]/A;
         
-        J = [Neta;Nzeta]*nodos;%el jacobiano para el punto elegido
+        D = [Neta; Nzeta];
     
-        J1 = inv(J);
-        
-        Bx = Neta*J1(1,1) + Nzeta*J1(1,2);
-        By = Neta*J1(2,1) + Nzeta*J1(2,2);
+        J = D*nodos;
+    
+        Bs = J\D;
+            
+        Bx = Bs(1,:);
+        By = Bs(2,:);
         
         dir1 = 1:2:2*cant_puntos;
         dir2 = 2:2:2*cant_puntos;

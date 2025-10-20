@@ -78,26 +78,9 @@ for i = 1:nelem
     dofs2 = mesh.dofs(mesh.elems.con(i,2),:);
     eleDofs = [dofs1 dofs2];%donde tiene que ir
 
-    global_loads = Kel*U(eleDofs);
+    Uel = U(eleDofs);
 
-    V = nodos(2,:) - nodos(1,:);
-    L = norm(V);
-
-    cs = V/L;
-    c = cs(1);
-    s = cs(2);
-
-    Q = [c s 0;
-         -s c 0;
-         0 0 1];
-
-    T(1:3, 1:3) = Q;
-    T(4:6, 4:6) = Q;
-
-    local_loads = T*global_loads;
-    P = -local_loads(1);
-
-    Ks(eleDofs,eleDofs) = Ks(eleDofs,eleDofs) + P*pandeo_Ks_viga(nodos);
+    Ks(eleDofs,eleDofs) = Ks(eleDofs,eleDofs) + pandeo_Ks_viga(nodos, Kel, Uel);
 end
 
 %Eigenvalue
@@ -123,6 +106,6 @@ modos_activos_pandeo = modos_activos_pandeo(:, I_positivos);
 modos_final = zeros(size(Aval_activos_pandeo,1),ndof); 
 modos_final(:,mesh.free) = modos_activos_pandeo'; 
 
-%Pandeo = Aval_activos_pandeo(1:6);
+Pandeo = Aval_activos_pandeo(1:6);
 
 k = Aval_activos_pandeo.^-0.5

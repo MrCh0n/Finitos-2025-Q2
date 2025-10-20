@@ -1,4 +1,4 @@
-function [Ks] = pandeo_Ks_3D(nodos, auxiliar)
+function [Ks] = pandeo_Ks_3D(nodos,Uel,Kel, auxiliar)
     V = nodos(2,:) - nodos(1,:);
     L = norm(V);
 
@@ -15,7 +15,12 @@ function [Ks] = pandeo_Ks_3D(nodos, auxiliar)
     dir1 = V/L;
     Q = crearQ(dir1, auxiliar);
 
+    fuerza = Q*Kel*Uel;
+
+    P = fuerza(1);
+
     Ks = Q'*Ksel*Q;
+    Ks = -P*Ks;
 end
 
 function [Q] = crearQ(dir1, auxiliar)

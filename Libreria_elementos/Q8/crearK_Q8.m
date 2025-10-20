@@ -50,18 +50,14 @@ for i = 1:orden
         Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]*A;%derivada de N en eta en los puntos de Gauss
         Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]*A;%derivada de N en zeta
         
-        J = [Neta; Nzeta]*nodos;%el jacobiaos para el punto de Gauss
-
-        
-        D = [Neta; Nzeta]';
-        pruebaB = D/J;
-
-        %J1 = inv(J);%el inverso para hacer B
-        %Bx = Neta*J1(1,1) + Nzeta*J1(1,2);%transforma las derivadas a x
-        %By = Neta*J1(2,1) + Nzeta*J1(2,2);%transformo las derivadas a y
-       
-        Bx = pruebaB(:,1);
-        By = pruebaB(:,2);
+        D = [Neta; Nzeta];
+    
+        J = D*nodos;
+    
+        Bs = J\D;
+            
+        Bx = Bs(1,:);
+        By = Bs(2,:);
         %crear la matrz B
         B(1,dir1) = Bx;
         B(2,dir2) = By;

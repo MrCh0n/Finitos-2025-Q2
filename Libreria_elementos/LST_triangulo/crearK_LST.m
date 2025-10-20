@@ -38,17 +38,21 @@ orden = size(puntos,1);
 B = zeros(3,cant_puntos);
 K = 0;
 
+    dir1 = 1:2:2*cant_puntos;
+    dir2 = 2:2:2*cant_puntos;
 for i = 1:orden
     Neta = [0, 1, 0, puntos(i,2), 2*puntos(i,1), 0]/A;
     Nzeta = [0, 0, 1, puntos(i,1), 0, 2*puntos(i,2)]/A;
     
-    J = [Neta; Nzeta]*nodos;%el jacobiano para el punto elegido
-    
-    Bx = Neta*J1(1,1) + Nzeta*J1(1,2);
-    By = Neta*J1(2,1) + Nzeta*J1(2,2);
-  
-    dir1 = 1:2:2*cant_puntos;
-    dir2 = 2:2:2*cant_puntos;
+    D = [Neta; Nzeta];
+
+    J = D*nodos;
+
+    Bs = J\D;
+        
+    Bx = Bs(1,:);
+    By = Bs(2,:);
+
     %crear la matrz B
     B(1,dir1) = Bx;
     B(2,dir2) = By;

@@ -1,4 +1,4 @@
-    function [K] = crearK_CST(nodos, C)
+function [K] = crearK_CST(nodos, C)
 %Crea la matriz de resistencia local de un CST sin el espesor
 %
 %K = crearK_CST(nodos, C)
@@ -41,12 +41,14 @@ for i = 1:orden
     Neta = [0, 1, 0]/A;
     Nzeta = [0, 0, 1]/A;
     
-    J = [Neta; Nzeta]*nodos;%el jacobiano para el punto elegido
+    D = [Neta; Nzeta];
 
-    J1 = inv(J);
+    J = D*nodos;
 
-    Bx = Neta*J1(1,1) + Nzeta*J1(1,2);
-    By = Neta*J1(2,1) + Nzeta*J1(2,2);
+    Bs = J\D;
+        
+    Bx = Bs(1,:);
+    By = Bs(2,:);
     
     dir1 = 1:2:2*cant_puntos;
     dir2 = 2:2:2*cant_puntos;

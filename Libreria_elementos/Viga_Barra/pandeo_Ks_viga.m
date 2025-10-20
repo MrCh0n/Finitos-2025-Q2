@@ -1,4 +1,4 @@
-function [Ks] = pandeo_Ks_viga(nodos)
+function [Ks] = pandeo_Ks_viga(nodos, Kel, Uel)
     V = nodos(2,:) - nodos(1,:);
     L = norm(V);
 
@@ -20,5 +20,10 @@ function [Ks] = pandeo_Ks_viga(nodos)
     T(1:3, 1:3) = Q;
     T(4:6, 4:6) = Q;
 
+    fuerza = T*Kel*Uel;
+
+    P = fuerza(1);
+
     Ks = T'*Ks*T;
+    Ks = -P*Ks;
 end

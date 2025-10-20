@@ -67,7 +67,6 @@ mesh.dofs = reshape(1:ndof,6,[])';
 mesh.free = true(nnod,6);
 empotrados = mesh.elems.transformada([1 4 5 8]);
 mesh.free(empotrados,:) = false;
-mesh.free
 
 mesh.free = reshape(mesh.free',[],1);
 
@@ -107,4 +106,69 @@ modos = zeros(sum(mesh.free),ndof); %menos la cantidad de restricciones
 modos(:,mesh.free) = Avec(:,idx)'; % Modos de vibración
 
 
-Frecuencias = f_n(1:6)
+Frecuencias = f_n(1:6);
+
+%% ej_14
+carga = 1;
+
+R = zeros(ndof,1);
+switch(carga)%crear R
+    case 1%fuer
+        R(10)=20
+    case 2
+
+    case 3
+
+end
+
+Rr = R(mesh.free);
+
+U = zeros(ndof,1);
+U(mesh.free) = Kr\Rr;
+
+Ks = zeros(ndof);
+
+for i = 1:size(div,1)
+    nodoid = mesh.elems.con(mesh.elems.inicio(i), :);
+
+    nodos = mesh.nodos(nodoid,:);
+
+    Kglobal = crearK_viga_3D(nodos,E,G,A,Iy,Iz,Ip, auxiliar);
+
+        %meterlo en la matriz enorme
+    cantidad = 0:div(i)-1;
+    for j = (mesh.elems.inicio(i) + cantidad)
+        dofs1 = mesh.dofs(mesh.elems.con(j,1),:);
+        dofs2 = mesh.dofs(mesh.elems.con(j,2),:);
+        eleDofs = [dofs1 dofs2];%donde tiene que ir
+
+        Uel = U(eleDofs);
+
+        Ks(eleDofs,eleDofs) = Ks(eleDofs, eleDofs) + pandeo_Ks_3D(nodos,Uel, Kglobal,auxiliar);
+    end 
+end
+
+%Eigenvalue
+Ksreducida = Ks(mesh.free,mesh.free);
+[Avec_pandeo, Aval_pandeo] = eig(full(Kr), -Ksreducida);
+
+% Eliminamos infinitos
+id_activos_pandeo=find(~isinf(diag(Aval_pandeo)));
+Avec_pandeo_activo = Avec_pandeo(:,id_activos_pandeo);
+
+% Ordenar y filtrar
+[Aval_activos_pandeo, Index] = sort(diag(Aval_pandeo(id_activos_pandeo,id_activos_pandeo)));
+modos_activos_pandeo = Avec_pandeo_activo(:, Index);
+
+
+
+%saco negativos
+I_positivos = Aval_activos_pandeo>0;
+Aval_activos_pandeo = Aval_activos_pandeo(I_positivos);
+modos_activos_pandeo = modos_activos_pandeo(:, I_positivos);
+
+
+modos_final = zeros(size(Aval_activos_pandeo,1),ndof); 
+modos_final(:,mesh.free) = modos_activos_pandeo'; 
+
+Pandeo = Aval_activos_pandeo(1:6);
