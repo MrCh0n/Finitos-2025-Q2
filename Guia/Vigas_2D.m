@@ -57,23 +57,7 @@ for i = 1:nelem
 
     nodos = mesh.nodes(dir_nod,:);
 
-     V = nodos(2,:) - nodos(1,:);
-     L = norm(V);
-
-
-    Kloc = crearK_viga_barra(nodos, E, A, I);
-
-    cs = V/L;
-    c = cs(1);
-    s = cs(2);
-
-    Q = [c s 0;
-         -s c 0;
-         0 0 1];
-    T(1:3, 1:3) = Q;
-    T(4:6, 4:6) = Q;
-    
-    Kglob = T'*Kloc*T;
+    Kglob = crearK_viga_barra(nodos, E, A, I);
 
     dir = mesh.dofs(dir_nod,:)';
 

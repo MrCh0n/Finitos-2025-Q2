@@ -2,7 +2,7 @@
 clc
 clear
 
-sistema = struct('coord',[],'elem',[],'prop',[],'BC',[],'Fnod',[]);
+sistema = struct('coord',[],'elem',[],'prop',[],'BC',[],'Fnod',[],'Q',[1]);
 
 E = 210e9;
 A = 20*20*1e-6;

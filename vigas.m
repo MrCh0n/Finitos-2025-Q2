@@ -80,9 +80,9 @@ for i = 1:nelem
 
     Inicio = Coord(Elem(i,1), 1);
 
-    for i = 0:Le/divisiones:Le;
-        def = [def subs(Vy, x, i)];
-        Largo = [Largo Inicio+i];
+    for j = 0:Le/divisiones:Le
+        def = [def subs(Vy, x, j)];
+        Largo = [Largo Inicio+j];
     end
 end
 

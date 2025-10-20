@@ -29,4 +29,16 @@ function [K] = crearK_viga_barra(nodos,E,A,I)
     K(dir_bar, dir_bar) = Kel_bar;
     K(dir_vig, dir_vig) = Kel_vig;
 
+    cs = V/L;
+    c = cs(1);
+    s = cs(2);
+
+    Q = [c s 0;
+         -s c 0;
+         0 0 1];
+    T(1:3, 1:3) = Q;
+    T(4:6, 4:6) = Q;
+    
+    K = T'*K*T;
+
 end
