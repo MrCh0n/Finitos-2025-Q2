@@ -10,7 +10,6 @@ function [K] = crearK_viga_3D(nodos,E,G,A,Iy,Iz,Ip,auxiliar)
 
     dir1 = V/L;
     Q = crearQ(dir1, auxiliar);
-
     K = Q'*Kel*Q;
 end
 

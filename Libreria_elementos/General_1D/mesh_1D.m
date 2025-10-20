@@ -2,7 +2,7 @@ function [nodos, elems, transformada, inicioElem] = mesh_1D(Elems, Nodes, Divisi
 %%funcion para hacer subnodos en un mesh, Elems es la conecciones entre
 %%nodos, Nodes son las coordenadas de los nodos y divisions son la
 %%cantidad de subelementos que se quieren, minimo 1
-
+%
 %Devuelve los nodos nuevos y sus conecciones en nodos y elems
 %respectivamente. Transformada es a que indice se van los nodos originales
 %y inicio elem son los indices donde empiezan los subelementos que
@@ -21,6 +21,8 @@ contador = 1;
 
 inicioElem = zeros(nelem,1);
 inicioElem(1) = 1;
+
+transformada = zeros(1,nnode);
 
 for i = 1:nelem
     inicio = Nodes(Elems(i,1), :);
@@ -56,9 +58,17 @@ for i = 1:nelem
 
     nodos = [nodos; subnodos];
     elems = [elems; subelems];
+    
+    if ~transformada(Elems(i,1))
+        transformada(Elems(i,1)) = max(transformada)+1;
+        transformada(Elems(i,1)) = subelems(1,1);
+    end
 
-    transformada(Elems(i,1)) = [subelems(1,1)];
-    transformada(Elems(i,2)) = [subelems(end,2)];
+    if ~transformada(Elems(i,2))
+        transformada(Elems(i,2)) = max(transformada)+1;
+        transformada(Elems(i,2)) = subelems(end,2);
+    end
+
     inicioElem(i+1) = inicioElem(i) + Divisions(i);
 end
 inicioElem(end) = [];
