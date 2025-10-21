@@ -3,8 +3,8 @@ clear
 
 auxiliar = [0 0 1];%direccion
 
-De = 20e-3;%m diametro
-Di = 10e-3;
+De = 40e-3;%m diametro
+Di = 30e-3;
 
 %Tubo hueco y acero
 E = 210e9;
@@ -18,7 +18,7 @@ y_max = De/2;%m
 z_max = De/2;%m
 r = De/2;
 
-nodos = [600 -550 0;
+Nodos = [600 -550 0;
          486 -523 237;
          0 -420 950;
          0 -550 0;
@@ -29,7 +29,7 @@ nodos = [600 -550 0;
          486 -349 237;
          486 349 237;
          288 0 560;
-         0 0 560];
+         0 0 560]*1e-3;
 
 elems = [1 2;
          1 9
@@ -54,9 +54,9 @@ elems = [1 2;
 
 nelem = size(elems,1);
 
-div = ones(nelem,1);
+div = 4*ones(nelem,1);
 
-[mesh.nodos, mesh.elems.con, mesh.elems.transformada, mesh.elems.inicio] = mesh_1D(elems, nodos,div);
+[mesh.nodos, mesh.elems.con, mesh.elems.transformada, mesh.elems.inicio] = mesh_1D(elems, Nodos,div);
 
 nnod = size(mesh.nodos,1);
 ndof = 6*nnod;%viga 3D
@@ -109,16 +109,60 @@ modos(:,mesh.free) = Avec(:,idx)'; % Modos de vibración
 Frecuencias = f_n(1:6);
 
 %% ej_14
-carga = 1;
+carga = 3;
 
 R = zeros(ndof,1);
 switch(carga)%crear R
-    case 1%fuer
-        R(10)=20
-    case 2
+    case 1%carga destribuida en +Y
+        L = norm(Nodos(1,:)-Nodos(2,:)) + norm(Nodos(3,:)-Nodos(2,:)) + norm(Nodos(3,:)-Nodos(4,:));%1-2 2-3 3-4
+        q = 40e3/L;%N/m
 
-    case 3
+        pos12 = mesh.elems.inicio(1);%es el elemento 1 originalmente;
+        pos23 = mesh.elems.inicio(4);%es el elemento 4 originalmente;
+        pos34 = mesh.elems.inicio(7);%es el elemento 7 originalmente;
 
+        pos = pos12:pos12+div(1)-1;
+        pos = [pos pos23:pos23+div(4)-1];
+        pos = [pos pos34:pos34+div(7)-1];
+
+        pos = mesh.elems.con(pos,:);
+        for i = 1:size(pos,1)
+            nodoid = pos(i,:);
+
+            nodos = mesh.nodos(nodoid,:);
+
+            L = norm(nodos(2,:)-nodos(1,:));
+
+            dofs1 = mesh.dofs(nodoid(1), :);
+            dofs2 = mesh.dofs(nodoid(2), :);
+
+            R(dofs1,:) = R(dofs1,:) + [0 q*L/2 0 -q*L^2/12 0 0]';
+            R(dofs2,:) = R(dofs2,:) + [0 q*L/2 0 q*L^2/12 0 0]';
+        end 
+    case 2%carga en el punto 3;
+        pos3 = mesh.elems.transformada(3);
+        R(mesh.dofs(pos3,1:3)) = 40e3*[0 1 -1]/sqrt(2);
+
+    case 3%carga destribuida en 3-7
+        L =  norm(Nodos(3,:)-Nodos(7,:));
+        q = 40e3/0.840;%N/m
+        pos = mesh.elems.inicio(5);%es el elemento 5 originalmente;
+        pos = pos:pos+div(5)-1;
+        pos = mesh.elems.con(pos,:);
+
+        for i = 1:size(pos,1)
+            nodoid = pos(i,:);
+
+            nodos = mesh.nodos(nodoid,:);
+
+            L = norm(nodos(2,:)-nodos(1,:));
+
+            dofs1 = mesh.dofs(nodoid(1), :);
+            dofs2 = mesh.dofs(nodoid(2), :);
+
+            R(dofs1,:) = R(dofs1,:) + [0 0 -q*L/2 -q*L^2/12 0 0]';
+            R(dofs2,:) = R(dofs2,:) + [0 0 -q*L/2 q*L^2/12 0 0]';
+        end 
 end
 
 Rr = R(mesh.free);

@@ -53,7 +53,7 @@ for i = 1:nelem
         pointsNodeID(Elems(i,2)) = subelems(end,2);
      end
     
-    contador = max(max(subelems)) + 1;
+    contador = max(max(subelems(:))+1,contador);
     Puntocreado([Elems(i,1) Elems(i,2)]) = true;
 
     nodos = [nodos; subnodos];
