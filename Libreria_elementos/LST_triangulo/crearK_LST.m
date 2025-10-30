@@ -21,7 +21,7 @@ end
 %% creo el isoparametrico
 cant_puntos = 6;
 
-x1 = [0; 1; 0; 0.5; 0; 0.5];
+x1 = [0; 1; 0; 0.5; 0.5; 0];
 y1 = [0; 0; 1; 0; 0.5; 0.5];
 A = [ones(cant_puntos,1) x1 y1 x1.*y1 x1.^2 y1.^2];
 
