@@ -1,4 +1,4 @@
-function [R] = carga_LST(nodos, carga_s, carga_v)
+function [R] = carga_LST(nodos, carga_s, carga_v, options)
 %Crea el vector de cargas (x,y) de un elemento LST
 %
 %R = carga_CST(nodos, cargas_s, cargas_v)
@@ -33,6 +33,13 @@ function [R] = carga_LST(nodos, carga_s, carga_v)
 % /     \
 %1 - 4 - 2 
 
+arguments
+        nodos (6,2) {mustBeNumeric}
+        carga_s (3,6) {mustBeNumeric}
+        carga_v (6,2) {mustBeNumeric}
+        options.coordenada (1,1) {mustBeNumericOrLogical} = false
+    end
+
 
     %% creo el isoparametrico
     cant_puntos = 6;
@@ -64,6 +71,31 @@ function [R] = carga_LST(nodos, carga_s, carga_v)
         w_diagonal;
         w_borde];
 
+     %para sacar dx/ds, dy/ds para cada linea
+     tipo = [-1 0;
+              1/sqrt(2) -1/sqrt(2)
+              0 1;];%direccion de tau en la linea respectiva
+
+         %giro la carga para que sea en x y
+     if options.coordenada
+
+        puntos_zeta = [y1([1 4 2])';
+                        y1([2 5 3])';
+                        y1([3 6 1])'];
+        
+        puntos_eta = [x1([1 4 2])';
+                        x1([2 5 3])';
+                        x1([3 6 1])'];
+
+        posicion = [1 2;
+                    3 4;
+                    5 6];
+
+        for i = 1:3
+            carga_s(i,:) = girar_carga(nodos, carga_s(i,:), A, puntos_eta(i,:), puntos_zeta(i,:), tipo(i,:), posicion);
+        end
+     end
+
     %puntos de gauss en xi para cada linea
     puntos_zeta = [zeros(orden,1)';
                     puntos_diagonal(2,:);
@@ -77,11 +109,6 @@ function [R] = carga_LST(nodos, carga_s, carga_v)
     nodos_linea = [1 4 2;
                    2 5 3;
                    3 6 1];
-    
-     %para sacar dx/ds, dy/ds para cada linea
-     tipo = [-1 0;
-              1/sqrt(2) -1/sqrt(2)
-              0 1;];%direccion de tau en la linea respectiva
     
     for i = 1:3
         tau = carga_s(i,1:2:end)';
@@ -139,14 +166,33 @@ function [Rx, Ry] = superficie(nodos, A,puntos_eta, puntos_zeta, nodos_linea, ta
             D = [Neta; Nzeta];
         
             J = D*nodos;
-            Jeta = direccion*J;
+            d_x_y = direccion*J;%[dx/ds dy/ds]
             
             Nr = N(nodos_linea);
-            Rx_aux = tau*Jeta(1)-sigma*Jeta(2);
-            Ry_aux = tau*Jeta(2)+sigma*Jeta(1);
+            Rx_aux = tau*d_x_y(1)-sigma*d_x_y(2);
+            Ry_aux = tau*d_x_y(2)+sigma*d_x_y(1);
             integrando = Nr'*Nr;
     
             Rx = Rx + integrando*Rx_aux*w(i);
             Ry = Ry + integrando*Ry_aux*w(i);
+    end% i
+end
+
+
+function [carga_s] = girar_carga(nodos, carga_s, A, puntos_eta, puntos_zeta, direccion,nodo_linea)
+    orden = size(puntos_eta,2);
+    for i = 1:orden
+            Neta = [0, 1, 0, puntos_zeta(i),2*puntos_eta(i),0]*A;%derivada de N en eta en los puntos de Gauss
+            Nzeta = [0, 0, 1, puntos_eta(i), 0, 2*puntos_zeta(i)]*A;%derivada de N en zeta
+            
+            D = [Neta; Nzeta];
+        
+            J = D*nodos;
+            tangencial = direccion*J;%[dx/ds dy/ds]
+            normal = tangencial*[0 1;-1 0];
+            giro = [tangencial' normal']/norm(tangencial);
+            
+            carga_s(nodo_linea(i,:)) =  carga_s(nodo_linea(i,:))*giro;
+            carga_s(nodo_linea(i,:))*giro;
     end% i
 end
