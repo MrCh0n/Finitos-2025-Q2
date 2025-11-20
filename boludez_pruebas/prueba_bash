@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+libreria="/home/gmartone/Desktop/ITBA/chib/Finitos-2025-Q2/Libreria_elementos"
+
+programa='prueba_Q8'
+dir='hola'
+R=1
+
+matlab -nodesktop -r "R=$R; R,dir='$libreria', addpath(genpath('$libreria'));$programa;exit"
+
+
+exit 0

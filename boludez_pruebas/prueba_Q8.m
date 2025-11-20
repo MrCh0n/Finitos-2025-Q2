@@ -24,18 +24,19 @@ R/2/sqrt(2);
 
 nodos = [0 0;
          1 0;
-         1 1;
+         0.5 1;
          0 1];
 
 carga = [0 0 0 0;
-         0 5860  0 5860;
-         0 0 0 0;
-         0 0 0 0];
+         0 0  0 0;
+         0 5860 0 5860;
+         0 0 0 0]*0;
 
 volumen = [zeros(4,1) -2400*9.81*ones(4,1)];
-volumen = [zeros(4,1) -ones(4,1)]*0;
+volumen = [zeros(4,1) -ones(4,1)];
 
-R = carga_Q4(nodos, carga, volumen, 'coordenada', true);
+R = carga_Q4(nodos, carga, volumen, 'coordenada', true)
+
 
 E = 200e9;
 t = 1;
@@ -47,7 +48,7 @@ K = crearK_Q4(nodos, C);
 
 
 libres = 1:8;
-libres([1 2 4]) = [];
+libres([1 2 3 4]) = [];
 Kr = K(libres, libres);
 Rr = R(libres);
 U = zeros(8,1);
