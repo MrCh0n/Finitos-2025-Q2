@@ -1,0 +1,69 @@
+function [K] = crearK_termico_Q8(nodos, k)
+%Crea la matriz de resistencia de un Q8 sin espesor
+%
+%K = crearK_Q8(nodos, k)
+%
+%nodos es una lista (x, y) de los 8 nodos del elemento
+%k es la conductividad termica
+%
+%poner los nodos como:
+% 4 - 7 - 3
+% |       |
+% 8       6
+% |       |
+% 1 - 5 - 2 
+
+%% creo el isoparametrico
+cant_puntos = 8;
+
+puntos_Q8 = [-1    -1;
+              1    -1;
+              1     1;
+             -1     1;
+              0    -1;
+              1     0;
+              0     1;
+             -1     0];
+
+x1 = puntos_Q8(:,1);%puntos del cuadrado
+y1 = puntos_Q8(:,2);
+A = [ones(cant_puntos,1) x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
+A = inv(A);
+
+%% Gauss
+puntos = [-sqrt(3/5) 0 sqrt(3/5)];
+w = [5/9 8/9 5/9];
+
+orden = size(puntos,2);
+
+dir1 = 1:2:2*cant_puntos;
+dir2 = 2:2:2*cant_puntos;
+B = zeros(2,cant_puntos);
+K = 0;
+
+for i = 1:orden
+    for j = 1:orden
+        Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]*A;%derivada de N en eta en los puntos de Gauss
+        Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]*A;%derivada de N en zeta
+        
+        D = [Neta; Nzeta];
+    
+        J = D*nodos;
+    
+        Bs = J\D;
+            
+        Bx = Bs(1,:);
+        By = Bs(2,:);
+        %crear la matrz B
+        B(1,:) = Bx;
+        B(2,:) = By;
+    
+        %mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
+        %Kmin = B'*C*B;%matriz a integrar
+        
+        K = K + B'*k*B*abs(det(J))*w(i)*w(j);%Kmin*mult;
+
+    end% j
+end% i
+
+end
