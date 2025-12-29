@@ -29,11 +29,23 @@ orden = size(puntos,2);
 
 B = zeros(2,cant_puntos);
 K = 0;
+%los del for loop precalculado le saca la mitad de la corrida al crearK
+
+% mat_Neta = [-0.4436    0.4436    0.0564   -0.0564;  
+%             -0.2500    0.2500    0.2500   -0.2500;
+%             -0.0564    0.0564    0.4436   -0.4436];
+% 
+% mat_Nzeta = [ -0.4436   -0.0564    0.0564    0.4436;
+%                -0.2500   -0.2500    0.2500    0.2500;
+%                -0.0564   -0.4436    0.4436    0.0564];
 
 for i = 1:orden
     for j = 1:orden
         Neta = [0, 1, 0 puntos(j)]/A;
         Nzeta = [0, 0, 1, puntos(i)]/A;
+
+        % Neta = mat_Neta(j,:);
+        % Nzeta = mat_Nzeta(i,:);
         
         D = [Neta; Nzeta];
     
@@ -48,7 +60,7 @@ for i = 1:orden
         %crear la matrz B
         B(1,:) = Bx;
         B(2,:) = By;
-    
+
         mult = abs(det(J))*w(i)*w(j);
         Kmin = B'*k*B;
         

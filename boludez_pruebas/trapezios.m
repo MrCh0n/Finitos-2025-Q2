@@ -1,5 +1,5 @@
-% clc
-% clear
+clc
+clear
 
 nodos = [0 0;
          1 0;

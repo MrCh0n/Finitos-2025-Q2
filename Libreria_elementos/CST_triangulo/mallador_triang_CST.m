@@ -1,5 +1,5 @@
-function [nodos, elems] = mallador_cuadrado_Q4(bordes,divX,divY)
-%mallador de elementos Q4 para un cuadrilatero
+function [nodos, elems] = mallador_triang_CST(bordes,divX,divY)
+%mallador de elementos CST para un cuadrilatero
 %
 %bordes es una matrix de (4,2) de los nodos limitantes al cuadrilatero
 %
@@ -37,15 +37,16 @@ function [nodos, elems] = mallador_cuadrado_Q4(bordes,divX,divY)
         end
     end
     
-    nelem = (divY-1)*(divX-1);
-    elems = zeros(nelem,4);
+    nelem = 2*(divY-1)*(divX-1);
+    elems = zeros(nelem,3);
     
     padding = divY;%el mismo de la siguiente columna
     for i = 1:divX-1
+        offset_elems = (i-1)*(divY-1)*2;
         offset = (i-1)*divY;
-        offset_elems = (i-1)*(divY-1);
         for j = 1:divY-1
-            elems(offset_elems+j,:) = [offset+j offset+j+padding offset+j+padding+1 offset+j+1];
+            elems(offset_elems+2*j-1,:) = [offset+j offset+j+1+padding offset+j+1];%los que se ven para arriba
+            elems(offset_elems+2*j,:) = [offset+j offset+j+padding offset+j+padding+1];%los que se ven para abajo
         end
     end
 end
