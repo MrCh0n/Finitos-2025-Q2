@@ -90,8 +90,10 @@ end% i
 
 
 %Shear
-puntos = [-sqrt(1/3) sqrt(1/3)];
-w = [1 1];
+puntos = [0];
+w = [2];
+%puntos = [-sqrt(1/3) sqrt(1/3)];
+%w = [1 1];
 
 orden = size(puntos,2);
 for i = 1:orden
