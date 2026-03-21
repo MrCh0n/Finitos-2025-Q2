@@ -1,30 +1,15 @@
-function [R] = carga_Q4(nodos, carga_s, carga_v, options)
-%Crea el vector de cargas (x,y) de un elemento Q4
+function [R] = carga_MQ4(nodos, carga, options)
+%Crea el vector de cargas (Pz,Mx,My) de un elemento MQ4
 %
-%R = carga_Q4(nodos, cargas_s, cargas_v)
+%R = carga_MQ4(nodos, cargas_s, cargas_v)
 %
 %nodos:
-%   es una lista (4,2) (x, y) de los 8 nodos del elemento
+%   es una lista (4,2) (x, y) de los 4 nodos del elemento
 %
 %cargas_s:
-%   son las cargas superficiales del Q4, tn es la fuerza tangencial y
-%   sn la normal del nodo n. Con normal saliente positiva y la tangente a su
-%   derecha
+%   es la presion en z en cada uno de los nodos del MQ4
 %
-%     ^ s
-%     | ->t
-%   ----- superficie 
 %
-%   cargas_s = [t1, s1, t2, s2;  (lado 1-2)
-%               t2, s2, t3, s3;  (lado 2-3)
-%               t3, s3, t4, s4;  (lado 3-4)
-%               t4, s4, t1, s1]  (lado 4-1)
-%
-%carga_v:
-%   es una lista (4,2) (x,y) de las fuerzas volumetricas en los nodos
-%   ejemplo de gravedad en -y [zeros(4,1), -rho*g*t*ones(4,1)]
-%   con rho la densidad del material, g la acceleracion por gravedad y t el
-%   espesor
 %
 % poner los nodos como:
 % 4 - - - 3
@@ -35,9 +20,7 @@ function [R] = carga_Q4(nodos, carga_s, carga_v, options)
 
 arguments
         nodos (4,2) {mustBeNumeric}
-        carga_s (4,4) {mustBeNumeric}
-        carga_v (4,2) {mustBeNumeric}
-        options.coordenada (1,1) {mustBeNumericOrLogical} = false
+        carga (4,1) {mustBeNumeric}
     end
 
 
@@ -107,7 +90,7 @@ arguments
         R(2*nodos_linea(i,:)) = R(2*nodos_linea(i,:)) + Ry;
     end
     
-    volumen =   area(nodos,puntos,w,A);
+    volumen =   area(nodos,puntos,w,A); %es de 4x4
     %volumen*[1;1;1;1;1;1;1;1] la fuerza/m^2 en cada nodo, normalmente rho*g*t
     
     R(1:2:end) = R(1:2:end) + volumen*carga_v(:,1);
@@ -138,45 +121,4 @@ end% i
 
 end
 
-function [Rx, Ry] = superficie(nodos, A,puntos_eta, puntos_zeta, nodos_linea, tau, sigma, w, direccion)
-    Rx = zeros(2,1);
-    Ry = zeros(2,1);
-    orden = size(puntos_eta,2);
-    for i = 1:orden
-            N = [1 puntos_eta(i), puntos_zeta(i), puntos_eta(i)*puntos_zeta(i)]*A;%N en eta zeta =-1 
-            Neta = [0, 1, 0,  puntos_zeta(i)]*A;%derivada de N en eta en los puntos de Gauss
-            Nzeta = [0, 0, 1, puntos_eta(i)]*A;%derivada de N en zeta
-            
-            D = [Neta; Nzeta];
-        
-            J = D*nodos;
-            d_x_y = direccion*J;%[dx/ds dy/ds]
-            
-            Nr = N(nodos_linea);
-            Rx_aux = tau*d_x_y(1)-sigma*d_x_y(2);
-            Ry_aux = tau*d_x_y(2)+sigma*d_x_y(1);
-            integrando = Nr'*Nr;
-    
-            Rx = Rx + integrando*Rx_aux*w(i);
-            Ry = Ry + integrando*Ry_aux*w(i);
-    end% i
-end
 
-
-function [carga_s] = girar_carga(nodos, carga_s, A, puntos_eta, puntos_zeta, direccion,nodo_linea)
-    orden = size(puntos_eta,2);
-    for i = 1:orden
-            Neta = [0, 1, 0,  puntos_zeta(i)]*A;%derivada de N en eta en los puntos de Gauss
-            Nzeta = [0, 0, 1, puntos_eta(i)]*A;%derivada de N en zeta
-            
-            D = [Neta; Nzeta];
-        
-            J = D*nodos;
-            tangencial = direccion*J;%[dx/ds dy/ds]
-            normal = tangencial*[0 1;-1 0];
-            giro = [tangencial' normal']/norm(tangencial);
-            
-            carga_s(nodo_linea(i,:)) =  carga_s(nodo_linea(i,:))*giro;
-            carga_s(nodo_linea(i,:))*giro;
-    end% i
-end
