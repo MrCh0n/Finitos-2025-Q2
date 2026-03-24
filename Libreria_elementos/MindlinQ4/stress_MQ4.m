@@ -1,4 +1,4 @@
-function [Stress,Momento] = stress_MQ4(Coord, Uel, E,v,t)
+function [Stress,Momentos] = stress_MQ4(Coord, Uel, E,v,t)
 %Stress = stress_Q4(Coord, Uel, C, Czz)
 %
 %Devuelve las tensiones en el punto central
@@ -89,18 +89,21 @@ function [Stress,Momento] = stress_MQ4(Coord, Uel, E,v,t)
     %% Tension
     Stress = zeros(1,5); 
 
-    z = t/2; % calculamos a altura t/2
+    z = t/2; % calculamos a altura t/2 (deberiamos tmb calcularlo a -t/2)
+    % OOJJJOOOOO
 
     eps_b = B_b*Uel;
     eps_s = B_s*Uel;
-    eps = [eps_b eps_s];
+    eps = [eps_b;eps_s];
 
     S = diag([-z -z -z 1 1]);
-    C = [C_b zeros(3,3);
-        zeros(2,2) C_s];
+    C = zeros(5);
+    C(1:3,1:3) = C_b;
+    C(4:5,4:5)= C_s;
+   
     Stress = C*S*eps; %sxx syy sxy
 
-    Momentos(1:3) = D_b*eps;
+    Momentos(1:3) = D_b*eps(1:3);
 
-    Momentos(4:5) = D_s*eps;
+    Momentos(4:5) = D_s*eps(4:5);
 end
