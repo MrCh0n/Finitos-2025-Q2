@@ -51,7 +51,7 @@ dir3 = 3:3:3*cant_puntos;
 K_b = 0;
 K_s = 0;
 
-%Bending
+%Bending (full)
 puntos = [-sqrt(1/3) sqrt(1/3)];
 w = [1 1];
 
@@ -89,7 +89,7 @@ for i = 1:orden
 end% i
 
 
-%Shear
+%Shear 1x1
 puntos = [0];
 w = [2];
 %puntos = [-sqrt(1/3) sqrt(1/3)];
