@@ -14,7 +14,7 @@ C = t*E/(1-v^2)*[1 v 0;
                 0 0 (1-v)/2];
 
 
-nelem = 10000;
+nelem = 100;
 
 %saltos entre filas de nodos
 %33-34...52
@@ -74,7 +74,7 @@ end
 
 Rr = R(mesh.Libres);
 
-Kr = K(mesh.Libres, mesh.Libre
+Kr = K(mesh.Libres, mesh.Libres);
 
 U = zeros(ndof,1);
 U(mesh.Libres) = Kr\Rr;

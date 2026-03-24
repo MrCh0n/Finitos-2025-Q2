@@ -26,18 +26,14 @@ A = [ones(cant_puntos,1) x1 y1 x1.*y1];
 
 
 %% Gauss
-puntos = [-sqrt(3/5) 0 sqrt(3/5)];
-w = [5/9 8/9 5/9];
-
-orden = size(puntos,2);
+[w, puntos, n] = gauss([3,3]);
 
 B = zeros(3,2*cant_puntos);
 K = 0;
 
-for i = 1:orden
-    for j = 1:orden
-        Neta = [0, 1, 0 puntos(j)]/A;
-        Nzeta = [0, 0, 1, puntos(i)]/A;
+for i = 1:n
+        Neta = [0, 1, 0 puntos(i,2)]/A;
+        Nzeta = [0, 0, 1, puntos(i,1)]/A;
         
         D = [Neta; Nzeta];
     
@@ -56,12 +52,10 @@ for i = 1:orden
         B(3,dir1) = By;
         B(3,dir2) = Bx;
     
-        mult = abs(det(J))*w(i)*w(j);
+        mult = abs(det(J))*w(i);
         Kmin = B'*C*B;
         
         K = K + Kmin*mult;
-
-    end% j
 end% i
 
 end

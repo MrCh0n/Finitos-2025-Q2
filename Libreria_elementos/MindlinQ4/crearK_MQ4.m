@@ -52,15 +52,11 @@ K_b = 0;
 K_s = 0;
 
 %Bending (full)
-puntos = [-sqrt(1/3) sqrt(1/3)];
-w = [1 1];
+[w, puntos, n] = gauss([2,2]);
 
-orden = size(puntos,2);
-
-for i = 1:orden
-    for j = 1:orden
-        Neta = [0, 1, 0 puntos(j)]/A;
-        Nzeta = [0, 0, 1, puntos(i)]/A;
+for i = 1:n
+        Neta = [0, 1, 0 puntos(i,2)]/A;
+        Nzeta = [0, 0, 1, puntos(i,1)]/A;
         
         D = [Neta; Nzeta];
     
@@ -80,28 +76,20 @@ for i = 1:orden
         B_b(3,dir2) = By;
         B_b(3,dir3) = Bx;
     
-        mult = abs(det(J))*w(i)*w(j);
+        mult = abs(det(J))*w(i);
         Kmin_b = B_b'*D_b*B_b;
         
         K_b = K_b + Kmin_b*mult;
-
-    end% j
 end% i
 
 
 %Shear 1x1
-puntos = [0];
-w = [2];
-%puntos = [-sqrt(1/3) sqrt(1/3)];
-%w = [1 1];
+[w, puntos, n] = gauss([1,1]);
 
-orden = size(puntos,2);
-for i = 1:orden
-    for j = 1:orden
-      
-        N = [1,puntos(i),puntos(j),puntos(i)*puntos(j)]/A;
-        Neta = [0, 1, 0 puntos(j)]/A;
-        Nzeta = [0, 0, 1, puntos(i)]/A;
+for i = 1:n
+        N = [1,puntos(i,1),puntos(i,2),puntos(i,1)*puntos(i,2)]/A;
+        Neta = [0, 1, 0 puntos(i,2)]/A;
+        Nzeta = [0, 0, 1, puntos(i,1)]/A;
         
         D = [Neta; Nzeta];
     
@@ -121,12 +109,10 @@ for i = 1:orden
         B_s(1,dir2) = N;
         B_s(2,dir3) = N;
     
-        mult = abs(det(J))*w(i)*w(j);
+        mult = abs(det(J))*w(i);
         Kmin_s = B_s'*D_s*B_s;
         
         K_s = K_s + Kmin_s*mult;
-
-    end% j
 end% i
 
 K = K_b + K_s;

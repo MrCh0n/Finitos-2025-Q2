@@ -35,20 +35,16 @@ A = [ones(cant_puntos,1) x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
 A = inv(A);
 
 %% Gauss
-puntos = [-sqrt(3/5) 0 sqrt(3/5)];
-w = [5/9 8/9 5/9];
-
-orden = size(puntos,2);
+[w, puntos, n] = gauss([3,3]);
 
 dir1 = 1:2:2*cant_puntos;
 dir2 = 2:2:2*cant_puntos;
 B = zeros(3,2*cant_puntos);
 K = 0;
 
-for i = 1:orden
-    for j = 1:orden
-        Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]*A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]*A;%derivada de N en zeta
+for i = 1:n
+        Neta = [0, 1, 0 2*puntos(i,1), puntos(i,2), 0, 2*puntos(i,1)*puntos(i,2), puntos(i,2)^2]*A;%derivada de N en eta en los puntos de Gauss
+        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,1)]*A;%derivada de N en zeta
         
         D = [Neta; Nzeta];
     
@@ -67,9 +63,7 @@ for i = 1:orden
         %mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
         %Kmin = B'*C*B;%matriz a integrar
         
-        K = K + B'*C*B*abs(det(J))*w(i)*w(j);%Kmin*mult;
-
-    end% j
+        K = K + B'*C*B*abs(det(J))*w(i);%Kmin*mult;
 end% i
 
 end
