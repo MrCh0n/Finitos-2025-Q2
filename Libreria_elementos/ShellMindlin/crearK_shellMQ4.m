@@ -22,8 +22,8 @@ arguments (Input)
    t {mustBeNumeric}
 end
 
-addpath('C:\Users\franc\OneDrive - ITBA\ITBA\ITBA\9no Cuatrimestre\FEM\Codigos Matlab\Chon\Finitos-2025-Q2\Libreria_elementos\MindlinQ4\')
-addpath('C:\Users\franc\OneDrive - ITBA\ITBA\ITBA\9no Cuatrimestre\FEM\Codigos Matlab\Chon\Finitos-2025-Q2\Libreria_elementos\Q4\')
+addpath(pwd+"/../MindlinQ4")
+addpath(pwd+"/../Q4")
 
 %plane stress
 C = E*t/(1-v^2)*[1 v 0;
@@ -52,8 +52,11 @@ Kmindlin = crearK_MQ4(nodosp(:,1:2),E,v,t);
 
 Kp = zeros(5*cant);
 
-Kp([1:2 6:7 11:12 16:17],[1:2 6:7 11:12 16:17]) = KQ4;
-Kp([3:5 8:10 13:15 18:20],[3:5 8:10 13:15 18:20]) = Kmindlin;
+plano_xy = [1:2 6:7 11:12 16:17];
+z_giros = [3:5 8:10 13:15 18:20];
+
+Kp(plano_xy, plano_xy) = KQ4;
+Kp(z_giros, z_giros) = Kmindlin;
 
 %spy(Kp)
 
