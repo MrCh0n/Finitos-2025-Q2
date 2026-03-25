@@ -7,14 +7,17 @@ function [K] = crearK_H8(nodos,C)
 %C es el constitutivo de 6x6
 %
 %poner los nodos como:
-% 4 - - - 3 --- 8 - - - 7 
-% |       |     |       |
-% |       | --- |       |
-% |       |     |       |
-% 1 - - - 2 --- 5 - - - 6
-%           ^ y
-% con ejes  |
-%           -> X
+%
+%    8-------7
+%  / |     / |
+% 5 ------6  |
+% |  |    |  |
+% |  4----|--3 
+% | /     | / 
+% 1 - - - 2 
+%          z ^   y
+% con ejes   | ↗
+%             --> X
 
 arguments (Input)
    nodos(8,3) {mustBeNumeric}
