@@ -63,7 +63,7 @@ for k = 1:nel
     x = mean(Nodos(Elem(k,:),1));
     y = mean(Nodos(Elem(k,:),2));
     if options.ElementLabel
-        text(x,y,z,num2str(k),'EdgeColor','k','Color','k','FontSize',18);
+        text(x,y,num2str(k),'EdgeColor','k','Color','k','FontSize',18);
     end
 end
 
