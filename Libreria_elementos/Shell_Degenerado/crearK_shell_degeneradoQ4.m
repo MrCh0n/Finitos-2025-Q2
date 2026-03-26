@@ -24,7 +24,7 @@ end
 %agrega el gauss
 addpath(pwd+"/../")
 %cantidad de dofs por nodo
-dofs = 5;
+dofsxnod = 5;
 %% Constitutivo de degenerado
 D1 = E/(1 - v^2);
 G = 0.5*E/(1 + v);
@@ -74,11 +74,11 @@ end%i
 [w, puntos, n] = gauss([3,3,3]);
 
 %para hacer el jacobiano al mismo tiempo
-v3 = squeeze(v(:,3,:));
+v3 = squeeze(v(:,3,:)); %vectores v3 de los nodos
 tt = [t; t; t];
 v3t = (v3.*tt)';
 
-Ks = zeros(dofs*cant_puntos);
+Ks = zeros(dofsxnod*cant_puntos);
 for i = 1:n
     xi = puntos(i,1);
     eta = puntos(i,2);
@@ -92,13 +92,14 @@ for i = 1:n
     
     J = [ dN*(nodos + zeta*v3t/2)
              N*(v3t)/2 ];
+    dN*(nodos + zeta*v3t/2);
 
     invJ = J\eye(3);
     
     %lo pasa de (2*cant_puntos) a (3,cant_puntos)
     dN = invJ(:,1:2)*dN;
 
-    B  = zeros(6,dofs*cant_puntos);
+    B  = zeros(6,dofsxnod*cant_puntos);
     for inod = 1:cant_puntos
         v1 = v(:, 1, inod);
         v2 = v(:, 2, inod);
@@ -117,8 +118,8 @@ for i = 1:n
                  -v2(2)*dZN(3) - v2(3)*dZN(2)    v1(2)*dZN(3) + v1(3)*dZN(2)
                  -v2(1)*dZN(3) - v2(3)*dZN(1)    v1(1)*dZN(3) + v1(3)*dZN(1) ]*0.5*t(inod);
 
-        ini = 1 + (inod - 1)*dofs;
-        fin = ini + dofs - 1;
+        ini = 1 + (inod - 1)*dofsxnod;
+        fin = ini + dofsxnod - 1;
         B(:,ini:fin) = [aux1 aux2];
     end%inod
 
@@ -138,7 +139,7 @@ end% i
 %para hacer el jacobiano al mismo tiempo
 tt = [t; t; t];
 v3t = (v3.*tt)';
-Kc = zeros(dofs*cant_puntos);
+Kc = zeros(dofsxnod*cant_puntos);
 for i = 1:n
     xi = puntos(i,1);
     eta = puntos(i,2);
@@ -156,9 +157,9 @@ for i = 1:n
     invJ = J\eye(3);
     
     %lo pasa de (2*cant_puntos) a (3,cant_puntos)
-    dN = invJ(:,1:2)*dN;
+    dN = invJ(:,1:2)*dN; %Nx y Ny
 
-    B  = zeros(6,dofs*cant_puntos);
+    B  = zeros(6,dofsxnod*cant_puntos);
     for inod = 1:cant_puntos
         v1 = v(:, 1, inod);
         v2 = v(:, 2, inod);
@@ -177,8 +178,8 @@ for i = 1:n
                  -v2(2)*dZN(3) - v2(3)*dZN(2)    v1(2)*dZN(3) + v1(3)*dZN(2)
                  -v2(1)*dZN(3) - v2(3)*dZN(1)    v1(1)*dZN(3) + v1(3)*dZN(1) ]*0.5*t(inod);
 
-        ini = 1 + (inod - 1)*dofs;
-        fin = ini + dofs - 1;
+        ini = 1 + (inod - 1)*dofsxnod;
+        fin = ini + dofsxnod - 1;
         B(:,ini:fin) = [aux1 aux2];
     end%inod
 
