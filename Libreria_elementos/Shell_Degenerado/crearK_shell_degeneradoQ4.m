@@ -1,4 +1,4 @@
-function [K] = crearK_shell_degeneradoQ4(nodos,E,v,t)
+function [K] = crearK_shell_degeneradoQ4(nodos,E,v,t,options)
 %Crea la matriz de resistencia de una cascara degenerada Q4
 %
 %K = crearK_shell_degenerado(nodos, E, v, t)
@@ -20,9 +20,8 @@ arguments (Input)
    E {mustBeNumeric}
    v {mustBeNumeric}
    t {mustBeNumeric}
+   options.V=[];
 end
-%agrega el gauss
-addpath(pwd+"/../")
 %cantidad de dofs por nodo
 dofsxnod = 5;
 %% Constitutivo de degenerado
