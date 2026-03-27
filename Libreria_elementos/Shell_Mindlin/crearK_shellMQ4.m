@@ -22,9 +22,6 @@ arguments (Input)
    t {mustBeNumeric}
 end
 
-addpath(pwd+"/../MindlinQ4")
-addpath(pwd+"/../Q4")
-
 %plane stress
 C = E*t/(1-v^2)*[1 v 0;
                v 1 0;

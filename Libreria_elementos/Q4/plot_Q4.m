@@ -1,8 +1,6 @@
-function [] = plot_Q4(nodos,elem, dofs, deformaciones, divisiones, mult)
+function [] = plot_Q4(nodos, deformaciones, mult)
 % nodos son todos los nodos del problema
 % deformaciones es la U
-
-nelem = size(elem,1);
 
 plot(nodos(:,1), nodos(:,2), 'k*');
 hold on
