@@ -7,10 +7,11 @@ close all
 addpath(genpath(pwd+"/../Libreria_elementos"))
 
 %% Datos del problema
+dofselem = 5;
 E = 200e9; %Pa
 v = 0.3;
 
-a = 0.4;%2;%1; %m
+a = 1;%2;%1; %m
 t = 50e-3; %m
 t=[t t t t];
 
@@ -70,10 +71,10 @@ elems(:,4) = aux;
 % hold off
 
 nnod = size(nodos,1); %cant nodos
-ndof = 5*nnod;
+ndof = dofselem*nnod;
 nelem = size(elems,1); %cant elementos
 
-dofs = reshape(1:ndof,5,[])';
+dofs = reshape(1:ndof,dofselem,[])';
 
 %% Calcular Direccion z
 v3_list = direcciones(nodos,elems);
@@ -89,6 +90,7 @@ for i=1:nelem
     
 
     Kel = crearK_shell_degeneradoQ4(nodos(nodoid,:),E,v,t);
+    %Kel = crearK_shellMQ4(nodos(nodoid,:),E,v,t(1));
 
 
     K(dir,dir)=K(dir,dir) + Kel;
@@ -110,12 +112,17 @@ free(dofs2fix) = false;
 R = zeros(ndof, 1);
 
 cargas_v = -q0*ones(4,1);
+aux = zeros(dofselem*4,1);
+dirs = [3 dofselem-1 dofselem];
+dirs = [dirs dirs+dofselem];
+dirs = [dirs dirs+dofselem*2];
 for i=1:nelem
     nodoid = elems(i,:);
     dir = dofs(nodoid,:);
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     carga = carga_MQ4(nodos(nodoid,[1 2]),cargas_v);
-    R(dir) = R(dir) + [0; 0; carga(1:3); 0; 0; carga(4:6); 0; 0; carga(7:9); 0; 0; carga(10:12)]; % Carga en el borde inferior
+    aux(dirs) = carga;
+    R(dir) = R(dir) + aux; % Carga en el borde inferior
 end
 
 %% Calculos

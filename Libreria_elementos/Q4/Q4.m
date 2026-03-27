@@ -1,4 +1,4 @@
-classdef Q4
+classdef Q4 < handle
     properties
         nodes
         elems
@@ -7,37 +7,41 @@ classdef Q4
         U
         K
         R
+        C
         counts
     end
 
     methods
-        function mesh = Q4(bordes,divx,divy)
+        function mesh = Q4(bordes,divx,divy,C)
             [mesh.nodes, mesh.elems] = mallador_cuadrado_Q4(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodes,1);
             mesh.counts.ndof = mesh.counts.nnod*2;
             mesh.counts.nelem = size(mesh.elems,1);
+            mesh.counts.L = norm(bordes(2,:)-bordes(1,:))/divx;
 
             mesh.R = zeros(mesh.counts.ndof, 1);
             mesh.U = zeros(mesh.counts.ndof, 1);
 
             mesh.K = zeros(mesh.counts.ndof, mesh.counts.ndof);
+            mesh.C = C;
 
             mesh.dofs = reshape(1:mesh.counts.ndof,2,[])';
             mesh.free = true(mesh.counts.nnod,2);
-
         end
 
-        function mesh = armar_K(mesh,i,C)
+        function mesh = armar_K(mesh)
+            for i = 1:mesh.counts.nelem
                 nodoid = mesh.elems(i,:);
 
                 nodos = mesh.nodes(nodoid,:);
 
-                Kel = crearK_Q4(nodos, C);
+                Kel = crearK_Q4(nodos, mesh.C);
 
                 dir = reshape(mesh.dofs(nodoid,:)',1,[]);
 
                 mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
+            end
         end
 
         function mesh = armar_R(mesh, i, carga_s, carga_v, type)
@@ -66,6 +70,13 @@ classdef Q4
             Rr = mesh.R(mesh.free);
 
             mesh.U(mesh.free) = Kr\Rr;
+        end
+
+        function dibujar(mesh)
+            max_U = max(mesh.U);
+            porciento = 5/100;
+            mult = mesh.counts.L/max_U*porciento;
+            plot_Q4(mesh.nodes, mesh.U,mult);
         end
     end
 

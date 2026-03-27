@@ -70,7 +70,7 @@ for i = 1:cant_puntos
     v(:,:,i) = [v1;v2;v3]'; %v1 es vector fila
 end%i
 %% Gauss Flexion
-[w, puntos, n] = gauss([3,3,3]);
+[w, puntos, n] = gauss([2,2,2]);
 
 %para hacer el jacobiano al mismo tiempo
 v3 = squeeze(v(:,3,:)); %vectores v3 de los nodos
@@ -133,7 +133,7 @@ for i = 1:n
 end% i
 
 %% Gauss Corte
-[w, puntos, n] = gauss([3,3,3]);
+[w, puntos, n] = gauss([2,2,2]);
 
 %para hacer el jacobiano al mismo tiempo
 tt = [t; t; t];
