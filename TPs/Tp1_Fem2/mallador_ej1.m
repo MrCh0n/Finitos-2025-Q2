@@ -1,18 +1,18 @@
-function [nodos, elems] = mallador_ej1(bordes,divx,divy)
+function [nodos, elems] = mallador_ej1(bordes,divx,divy,R,titamax)
 [nodos, elems] = mallador_cuadrado_Q4(bordes,divx,divy);
 a = max(nodos(:,1));
 
 nnod = size(nodos,1);
 
-R = 1;
-titamax=40;
+%R = 1;
+%titamax=40;
 zmin = R*cosd(titamax);
 for i = 1:nnod
     x = nodos(i,1);
     y = nodos(i,2);
 
     tita = titamax*(x/a);
-
+    x=R*sind(tita);
     z = R*cosd(tita) - zmin;
     aux_nodos(i,:) = [x y z];
 end

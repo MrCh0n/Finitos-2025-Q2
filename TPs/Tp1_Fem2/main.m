@@ -7,7 +7,7 @@ close all
 addpath(genpath('C:\Users\franc\OneDrive - ITBA\ITBA\ITBA\9no Cuatrimestre\FEM\Codigos Matlab\Chon\Finitos-2025-Q2\Libreria_elementos'))
 
 %% Datos del problema
-E = 4.32*e8; %psi
+E = 4.32e8; %psi
 v = 0;
 
 R = 25; %in
@@ -23,16 +23,21 @@ type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 div = 4; %cuantas divisiones en cada  lado
 
 switch type
-        case 1 %Mindlin
-            T = t;
-            dofselem = 6;
-            crearK = crearK_shellMQ4;
-        case 2
-            T = t*ones(1,4);
-            dofselem = 5;
-            crearK = crearK_shell_degeneradoQ4;
+    case 1 %Mindlin
+        T = t;
+        dofselem = 6;
+        crearK = @crearK_shellMQ4;
+    case 2
+        T = t*ones(1,4);
+        dofselem = 5;
+        crearK = @crearK_shell_degeneradoQ4;
+end
 %% Malla
-%[nodos,elems] = mallador
+bordes = [0,0;
+          L,0;
+          L,L/2;
+          0,L/2];
+[nodos,elems] = mallador_ej1(bordes,div,div,R,tita);
 
 figure(2)
 draw_Mesh(elems,nodos, 'NodeLabel',true,'Type','Q4','Color','b')
@@ -63,3 +68,15 @@ for i=1:nelem
     K(dir,dir)=K(dir,dir) + Kel;
 end
 
+%% Condiciones de borde
+free = true(ndof,1);
+
+borde_CD = abs(nodos(:,1)) <1e-6; %x = 0
+borde_AC = abs(nodos(:,2)) <1e-6; %y = 0
+%borde_BD = abs(nodos(:,1) - a) <1e-6;
+%borde_AB = abs(nodos(:,2) - a) <1e-6;
+
+% empotrado
+%dofs2fix = [dofs(borde_1,:);dofs(borde_2,:);dofs(borde_3,:);dofs(borde_4,:)];
+
+free(dofs2fix) = false;
