@@ -60,13 +60,13 @@ for i = 1:cant_puntos
             x1=4; x2=3; y1=1; y2=4;
     end
     v1 = (nodos(x2,:)-nodos(x1,:))/norm(nodos(x2,:)-nodos(x1,:));
-    
+
     v3 = cross(v1,(nodos(y2,:)-nodos(y1,:)));
-    
+
     v3 = v3 / norm(v3); % Normalize the cross product vector
-    
+
     v2 = cross(v3,v1);
-    
+
     v(:,:,i) = [v1;v2;v3]'; %v1 es vector fila
 end%i
 %% Gauss Flexion
@@ -88,13 +88,13 @@ for i = 1:n
     Neta = [0, 0, 1, xi]*A;
 
     dN = [Nxi; Neta];
-    
+
     J = [ dN*(nodos + zeta*v3t/2)
              N*(v3t)/2 ];
     dN*(nodos + zeta*v3t/2);
 
     invJ = J\eye(3);
-    
+
     %lo pasa de (2*cant_puntos) a (3,cant_puntos)
     dN = invJ(:,1:2)*dN;
 
@@ -123,17 +123,17 @@ for i = 1:n
     end%inod
 
     T = giro_B(J);
-  
+
     B = T*B;
 
     mult = abs(det(J))*w(i);
     Kmin = B'*Ds*B;
-    
+
     Ks = Ks + Kmin*mult;
 end% i
 
 %% Gauss Corte
-[w, puntos, n] = gauss([2,2,2]);
+[w, puntos, n] = gauss([1,1,1]);
 
 %para hacer el jacobiano al mismo tiempo
 tt = [t; t; t];
@@ -149,12 +149,12 @@ for i = 1:n
     Neta = [0, 0, 1, xi]*A;
 
     dN = [Nxi; Neta];
-    
+
     J = [ dN*(nodos + zeta*v3t/2)
              N*(v3t)/2 ];
 
     invJ = J\eye(3);
-    
+
     %lo pasa de (2*cant_puntos) a (3,cant_puntos)
     dN = invJ(:,1:2)*dN; %Nx y Ny
 
@@ -183,12 +183,12 @@ for i = 1:n
     end%inod
 
     T = giro_B(J);
-  
+
     B = T*B;
 
     mult = abs(det(J))*w(i);
     Kmin = B'*Dc*B;
-    
+
     Kc = Kc + Kmin*mult;
 end% i
 
@@ -196,9 +196,12 @@ end% i
 K = Ks+Kc;
 end
 
+
+
 function [T] = giro_B(J)
     % J es el jacobiano
     % sistema de coordenadas local 123 en [ksi eta zeta]
+    % size 5x6
     dir1 = J(1,:);
     dir3 = cross(dir1,J(2,:));
     dir2 = cross(dir3,dir1);
