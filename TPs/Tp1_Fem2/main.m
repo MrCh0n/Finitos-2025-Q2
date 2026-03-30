@@ -20,19 +20,21 @@ q = -90; %psi
 %% Control
 type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 4; %cuantas divisiones en cada  lado
+div = 16; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
         T = t;
         dofselem = 6;
         crearK = @crearK_shellMQ4;
-        %sym =
+        sym_yz = [1 5 6];
+        sym_xz = [2 4 6];
     case 2
         T = t*ones(1,4);
         dofselem = 5;
         crearK = @crearK_shell_degeneradoQ4;
-        %sym = 
+        %sym_yz = 
+        %sym_xz =
 end
 %% Malla
 
@@ -75,9 +77,9 @@ borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
-free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z y giro_y)
-free(dofs(borde_AC,[1 5 6])) = false; %sym (mov en x, giro en y z)
-free(dofs(borde_AB,[2 4 6])) = false; %sym (mov y, giro en x y z)
+free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z y giro_y) 5
+free(dofs(borde_AC,sym_yz)) = false; %sym (mov en x, giro en y z) 6
+free(dofs(borde_AB,sym_xz)) = false; %sym (mov y, giro en x y z) 6
 
 %% Cargas
 
@@ -110,7 +112,7 @@ x = nodos(:,1);
 y = nodos(:,2);
 z = nodos(:,3);
 
-escala = 100;
+escala = 20;
 x_deformada = x + escala*U(1:dofselem:ndof);
 y_deformada = y + escala*U(2:dofselem:ndof);
 z_deformada = z + escala*U(3:dofselem:ndof);
