@@ -11,7 +11,7 @@ E = 4.32e8; %psi
 v = 0;
 
 R = 25; %in
-L = 25; %in
+L = 50; %in
 t = 0.25 ; %in
 tita = 40; %grados
 
@@ -75,7 +75,7 @@ borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
-free(dofs(borde_CD,:)) = false; %empotrado
+free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z y giro_y)
 free(dofs(borde_AC,[1 5 6])) = false; %sym (mov en x, giro en y z)
 free(dofs(borde_AB,[2 4 6])) = false; %sym (mov y, giro en x y z)
 
@@ -91,7 +91,7 @@ for i=1:nelem
     
     dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
-    R(dir) = R(dir) + Ae*t*q/4*ones(4,1); 
+    R(dir) = R(dir) + Ae*q/4*ones(4,1); 
 end
 
 
@@ -110,7 +110,7 @@ x = nodos(:,1);
 y = nodos(:,2);
 z = nodos(:,3);
 
-escala = 500;
+escala = 100;
 x_deformada = x + escala*U(1:dofselem:ndof);
 y_deformada = y + escala*U(2:dofselem:ndof);
 z_deformada = z + escala*U(3:dofselem:ndof);
@@ -121,6 +121,9 @@ draw_Mesh(elems,nodos,'Type','Q4','Color','b')
 hold on
 draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
 hold off
+
+%% Valores del benchmark
+wB = U(dofs(nnod,3)) %el ultimo nodo en z
 
 %% Funciones
 
