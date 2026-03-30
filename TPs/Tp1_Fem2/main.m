@@ -16,9 +16,9 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 16; %cuantas divisiones en cada  lado
+div = 4; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
@@ -77,7 +77,7 @@ borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
-free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z y giro_y) 5
+free(dofs(borde_CD,[1 3])) = false; %es rigida la pared (x, z) y giro_y) 5
 free(dofs(borde_AC,sym_yz)) = false; %sym (mov en x, giro en y z) 6
 free(dofs(borde_AB,sym_xz)) = false; %sym (mov y, giro en x y z) 6
 
@@ -90,7 +90,8 @@ for i=1:nelem
     dir = dofs(nodoid,:);
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     %Ae = area(nodos(nodoid,:));
-    Ae = Volumen_degenerado(nodos(nodoid,:),T');
+    Ve = Volumen_degenerado(nodos(nodoid,:),T');
+    Ae = Ve/t;
     
     dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
@@ -126,7 +127,10 @@ draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
 hold off
 
 %% Valores del benchmark
-wB = U(dofs(nnod,3)) %el ultimo nodo en z
+wB = U(dofs(nnod,3)); %el ultimo nodo en z
+
+%% Tensiones
+
 
 %% Funciones
 
