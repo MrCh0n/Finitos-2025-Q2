@@ -27,12 +27,12 @@ switch type
         T = t;
         dofselem = 6;
         crearK = @crearK_shellMQ4;
-        sym =
+        %sym =
     case 2
         T = t*ones(1,4);
         dofselem = 5;
         crearK = @crearK_shell_degeneradoQ4;
-        sym = 
+        %sym = 
 end
 %% Malla
 
@@ -70,8 +70,8 @@ end
 %% Condiciones de borde
 free = true(ndof,1);
 
-borde_CD = abs(nodos(:,1)) <1e-6; %x = 0
-borde_AC = abs(nodos(:,2)) <1e-6; %y = 0
+borde_AC = abs(nodos(:,1)) <1e-6; %x = 0
+borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
@@ -89,8 +89,9 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     Ae = area(nodos(nodoid,:));
     
+    dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
-    R(dir(3:dofselem:4*dofselem)) = R(dir) + Ae*q/4; % Carga en z
+    R(dir) = R(dir) + Ae*t*q/4*ones(4,1); 
 end
 
 
@@ -105,9 +106,23 @@ U = zeros(ndof,1);
 U(free) = Kr\Rr;
 
 %% Graficar
+x = nodos(:,1);
+y = nodos(:,2);
+z = nodos(:,3);
+
+escala = 500;
+x_deformada = x + escala*U(1:dofselem:ndof);
+y_deformada = y + escala*U(2:dofselem:ndof);
+z_deformada = z + escala*U(3:dofselem:ndof);
+nodos_deformada = [x_deformada y_deformada z_deformada];
+
+figure(3)
+draw_Mesh(elems,nodos,'Type','Q4','Color','b')
+hold on
+draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
+hold off
 
 %% Funciones
-
 
 function [Ae] = area(nodos)
     v1 = (nodos(2,:)-nodos(1,:))/norm(nodos(2,:)-nodos(1,:));
