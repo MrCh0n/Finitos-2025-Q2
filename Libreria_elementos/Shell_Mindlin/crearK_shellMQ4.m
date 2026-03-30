@@ -48,7 +48,7 @@ KQ4 = crearK_Q4(nodosp(:,1:2),C);
 Kmindlin = crearK_MQ4(nodosp(:,1:2),E,v,t);
 %area
 Ae = area(nodosp(:,1:2));
-alfa = 0.5;
+alfa = 1e-4;
 G = 0.5*E/(1 + v);
 Ktitaz = alfa*Ae*G*t*eye(4);
 
