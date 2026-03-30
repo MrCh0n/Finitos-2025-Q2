@@ -48,8 +48,8 @@ colorbar;
 hold off
 
 %% Malla
-div_X = 100;
-div_Y = 100;
+div_X = 10;
+div_Y = 10;
 
 bordes = [0,0;
           0,a;

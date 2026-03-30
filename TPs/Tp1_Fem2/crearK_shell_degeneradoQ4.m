@@ -1,4 +1,4 @@
-function [K] = crearK_shell_degeneradoQ4(nodos,E,v,t,options)
+function [K] = crearK_shell_degeneradoQ4(nodos,E,v,t,v3)
 %Crea la matriz de resistencia de una cascara degenerada Q4
 %
 %K = crearK_shell_degenerado(nodos, E, v, t)
@@ -20,7 +20,7 @@ arguments (Input)
    E {mustBeNumeric}
    v {mustBeNumeric}
    t {mustBeNumeric}
-   options.V=[];
+   v3(3,4) {mustBeNumeric};
 end
 %cantidad de dofs por nodo
 dofsxnod = 5;
@@ -45,7 +45,6 @@ x1 = [-1; 1; 1; -1];
 y1 = [-1; -1; 1; 1];
 A = [ones(cant_puntos,1) x1 y1 x1.*y1];
 A = inv(A);
-
 %% Direcciones de los nodos
 v = zeros(3,3,cant_puntos);
 for i = 1:cant_puntos
@@ -60,20 +59,15 @@ for i = 1:cant_puntos
             x1=4; x2=3; y1=1; y2=4;
     end
     v1 = (nodos(x2,:)-nodos(x1,:))/norm(nodos(x2,:)-nodos(x1,:));
+    aux = v3(:,i)';
+    v2 = cross(aux,v1);
 
-    v3 = cross(v1,(nodos(y2,:)-nodos(y1,:)));
-
-    v3 = v3 / norm(v3); % Normalize the cross product vector
-
-    v2 = cross(v3,v1);
-
-    v(:,:,i) = [v1;v2;v3]'; %v1 es vector fila
+    v(:,:,i) = [v1;v2;aux]'; %v1 es vector fila
 end%i
 %% Gauss Flexion
 [w, puntos, n] = gauss([2,2,2]);
 
 %para hacer el jacobiano al mismo tiempo
-v3 = squeeze(v(:,3,:)); %vectores v3 de los nodos
 tt = [t; t; t];
 v3t = (v3.*tt)';
 

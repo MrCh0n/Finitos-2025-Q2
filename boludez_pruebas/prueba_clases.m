@@ -1,6 +1,7 @@
 clc
 clear
 
+addpath(genpath(pwd+"/../Libreria_elementos"))
 %% Datos problema
 E = 200e9;
 t = 1;
@@ -18,18 +19,17 @@ bordes = [0 0;
 divx = 10;
 divy = 10;
 
+cant_puntos = 6;
+
 %% creo el mesh y calculo la K
-mesh = Q4(bordes,divx,divy,C);
+mesh = LST(bordes,divx,divy,C);
 
 mesh.armar_K;
 
 %% hacer la carga
-carga = [0 0 0 0;
-         0 0  0 0;
-         0 5860 0 5860;
-         0 0 0 0]*0;
+carga = zeros(3,6);
 
-volumen = [zeros(4,1) -ones(4,1)];
+volumen = [zeros(cant_puntos,1) -ones(cant_puntos,1)];
 % i puede ser el elemento justo que se quiere cargar, puse todos porque
 % quiero hacer una fuerza volumetrica solo
 for i = 1:mesh.counts.nelem

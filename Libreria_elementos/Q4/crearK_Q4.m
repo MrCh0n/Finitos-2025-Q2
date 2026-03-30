@@ -26,7 +26,7 @@ A = [ones(cant_puntos,1) x1 y1 x1.*y1];
 
 
 %% Gauss
-[w, puntos, n] = gauss([3,3]);
+[w, puntos, n] = gauss([2,2]);
 
 B = zeros(3,2*cant_puntos);
 K = 0;

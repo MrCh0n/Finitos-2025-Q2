@@ -1,4 +1,4 @@
-classdef Q4 < handle
+classdef CST < handle
     properties
         nodes
         elems
@@ -12,8 +12,8 @@ classdef Q4 < handle
     end
 
     methods
-        function mesh = Q4(bordes,divx,divy,C)
-            [mesh.nodes, mesh.elems] = mallador_cuadrado_Q4(bordes,divx,divy);
+        function mesh = CST(bordes,divx,divy,C)
+            [mesh.nodes, mesh.elems] = mallador_triang_CST(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodes,1);
             mesh.counts.ndof = mesh.counts.nnod*2;
@@ -36,7 +36,7 @@ classdef Q4 < handle
 
                 nodos = mesh.nodes(nodoid,:);
 
-                Kel = crearK_Q4(nodos, mesh.C);
+                Kel = crearK_CST(nodos, mesh.C);
 
                 dir = reshape(mesh.dofs(nodoid,:)',1,[]);
 
@@ -49,7 +49,7 @@ classdef Q4 < handle
 
                 nodos = mesh.nodes(nodoid,:);
 
-                Rel = carga_Q4(nodos, carga_s, carga_v, "coordenada", type);
+                Rel = carga_CST(nodos, carga_s, carga_v, "coordenada", type);
 
                 dir = reshape(mesh.dofs(nodoid,:)',1,[]);
 
@@ -76,7 +76,7 @@ classdef Q4 < handle
             max_U = max(mesh.U);
             porciento = 5/100;
             mult = mesh.counts.L/max_U*porciento;
-            plot_Q4(mesh.nodes, mesh.U,mult);
+            plot_CST(mesh.nodes,mesh.elems,mesh.dofs,mesh.U,mult,mesh.C);
         end
     end
 
