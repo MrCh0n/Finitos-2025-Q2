@@ -4,8 +4,6 @@ clc
 clear all
 close all
 
-addpath(genpath('C:\Users\franc\OneDrive - ITBA\ITBA\ITBA\9no Cuatrimestre\FEM\Codigos Matlab\Chon\Finitos-2025-Q2\Libreria_elementos'))
-
 %% Datos del problema
 E = 4.32e8; %psi
 v = 0;
@@ -18,7 +16,7 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 div = 16; %cuantas divisiones en cada  lado
 
@@ -33,8 +31,8 @@ switch type
         T = t*ones(1,4);
         dofselem = 5;
         crearK = @crearK_shell_degeneradoQ4;
-        %sym_yz = 
-        %sym_xz =
+        sym_yz = [1 5];
+        sym_xz = [2 4];
 end
 %% Malla
 
@@ -52,7 +50,7 @@ nelem = size(elems,1); %cant elementos
 dofs = reshape(1:ndof,dofselem,[])';
 
 %% Calcular direccion z
-
+v3 = direcciones(nodos,elems);
 %% Matriz de rigidez
 
 K = zeros(ndof);
@@ -63,8 +61,10 @@ for i=1:nelem
 
     dir = dofs(nodoid,:);
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+    v3_el = v3(:,nodoid);
     
-    Kel = crearK(nodos(nodoid,:),E,v,T);
+    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
+    %Kel = crearK(nodos(nodoid,:),E,v,T);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -89,7 +89,8 @@ for i=1:nelem
     nodoid = elems(i,:);
     dir = dofs(nodoid,:);
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
-    Ae = area(nodos(nodoid,:));
+    %Ae = area(nodos(nodoid,:));
+    Ae = Volumen_degenerado(nodos(nodoid,:),T');
     
     dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
@@ -159,15 +160,6 @@ function [Ae] = area(nodos)
     end
 end
 
-t=0.25;
-nodos = [0 0 0;
-         1 0 0;
-         1 1 0;
-         0 1 0];
-
-T = [t t t/2 t/2]';
-
-A = Volumen_degenerado(nodos,T)
 function [Ae] = Volumen_degenerado(nodos,T)
     % T es 4x1 de los espesores en el elemento
     % nodos es 4x3 de las coordenadas
