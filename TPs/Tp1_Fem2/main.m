@@ -153,3 +153,40 @@ function [Ae] = area(nodos)
         Ae = Ae + mult;
     end
 end
+
+t=0.25;
+nodos = [0 0 0;
+         1 0 0;
+         1 1 0;
+         0 1 0];
+
+T = [t t t/2 t/2]';
+
+A = Volumen_degenerado(nodos,T)
+function [Ae] = Volumen_degenerado(nodos,T)
+    % T es 4x1 de los espesores en el elemento
+    % nodos es 4x3 de las coordenadas
+    x1 = [-1; 1; 1; -1];
+    y1 = [-1; -1; 1; 1];
+    A = [ones(4,1) x1 y1 x1.*y1];
+    [w, puntos, n] = gauss([2,2]);
+    Ae = 0; % area del elemento
+    for i = 1:n
+        N = [1 puntos(i,1) puntos(i,2) puntos(i,1)*puntos(i,2)]/A;
+        Neta = [0, 1, 0 puntos(i,2)]/A;
+        Nzeta = [0, 0, 1, puntos(i,1)]/A;
+        
+        D = [Neta; Nzeta];     
+        J = D * nodos;         % 2x3 jacobiano de xy->xyz
+        
+        X = J(1,:);          
+        Y = J(2,:);        
+
+        J = [norm(X) 0;
+             0        norm(Y)];
+
+        espesor = N*T;
+        mult = abs(det(J))*w(i);
+        Ae = Ae + mult*espesor;
+    end
+end
