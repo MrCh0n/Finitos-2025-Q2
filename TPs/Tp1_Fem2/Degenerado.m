@@ -69,6 +69,10 @@ classdef Degenerado < handle
             end
         end
 
+        function mesh = cargar_R(mesh,R)
+           mesh.R = R;
+        end
+
         function mesh = cond_borde(mesh, nodos, restricciion)
                 mesh.free(nodos, restricciion) = false;
         end
@@ -86,7 +90,7 @@ classdef Degenerado < handle
             ndof = mesh.counts.ndof;
             % sin deformar
             figure(2)
-            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
+            %draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
             hold off
 
             % Deformada
