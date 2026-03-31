@@ -55,7 +55,7 @@ function [Esfuerzos] = stress_shellMQ4(nodos, Uel, E,v,t)
     %Placa de Mindlin
     [Stress,Momentos] = stress_MQ4(nodosp(:,1:2), Uelp(dir_placas), E,v,t);
 
-    C = E/(1-v^2)*[1 v 0;
+    C = E*t/(1-v^2)*[1 v 0;
                      v 1 0;
                      0 0 (1-v)/2];
     %Elemento membranal

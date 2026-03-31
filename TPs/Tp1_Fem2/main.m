@@ -18,7 +18,7 @@ q = -90; %psi
 %% Control
 type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 4; %cuantas divisiones en cada  lado
+div = 8; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
@@ -63,8 +63,8 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     v3_el = v3(:,nodoid);
     
-    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
-    %Kel = crearK(nodos(nodoid,:),E,v,T);
+    %Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
+    Kel = crearK(nodos(nodoid,:),E,v,T);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -130,7 +130,24 @@ hold off
 wB = U(dofs(nnod,3)); %el ultimo nodo en z
 
 %% Tensiones
+esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
+for i = 1:nelem
+    nodoid = elems(i,:);
 
+    dir = dofs(nodoid,:);
+    dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+
+    Coord = nodos(nodoid,:);
+    
+    Uel = U(dir);
+    esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+end
+
+% plotear en linea AB
+dir = div:div:nelem; %son los ultimos elementos de cada fila
+Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
+My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
+Qy_p = esfuerzos(dir,6);
 
 %% Funciones
 
