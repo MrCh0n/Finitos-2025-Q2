@@ -16,7 +16,7 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 div = 8; %cuantas divisiones en cada  lado
 
@@ -63,8 +63,8 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     v3_el = v3(:,nodoid);
     
-    %Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
-    Kel = crearK(nodos(nodoid,:),E,v,T);
+    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
+    %Kel = crearK(nodos(nodoid,:),E,v,T);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -77,7 +77,7 @@ borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
-free(dofs(borde_CD,[1 3])) = false; %es rigida la pared (x, z) y giro_y) 5
+free(dofs(borde_CD,[1 3])) = false; %es rigida la pared (x, z) y giro_y 5
 free(dofs(borde_AC,sym_yz)) = false; %sym (mov en x, giro en y z) 6
 free(dofs(borde_AB,sym_xz)) = false; %sym (mov y, giro en x y z) 6
 
@@ -91,7 +91,7 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     %Ae = area(nodos(nodoid,:));
     Ve = Volumen_degenerado(nodos(nodoid,:),T');
-    Ae = Ve/t;
+    Ae = Ve/t; %se puede hacer con area() y da lo mismo
     
     dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
@@ -130,24 +130,24 @@ hold off
 wB = U(dofs(nnod,3)); %el ultimo nodo en z
 
 %% Tensiones
-esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
-for i = 1:nelem
-    nodoid = elems(i,:);
-
-    dir = dofs(nodoid,:);
-    dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
-
-    Coord = nodos(nodoid,:);
-    
-    Uel = U(dir);
-    esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
-end
-
-% plotear en linea AB
-dir = div:div:nelem; %son los ultimos elementos de cada fila
-Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
-My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
-Qy_p = esfuerzos(dir,6);
+% esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
+% for i = 1:nelem
+%     nodoid = elems(i,:);
+% 
+%     dir = dofs(nodoid,:);
+%     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+% 
+%     Coord = nodos(nodoid,:);
+% 
+%     Uel = U(dir);
+%     esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+% end
+% 
+% % plotear en linea AB
+% dir = div:div:nelem; %son los ultimos elementos de cada fila
+% Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
+% My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
+% Qy_p = esfuerzos(dir,6);
 
 %% Funciones
 
