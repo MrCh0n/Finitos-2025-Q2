@@ -33,30 +33,21 @@ function [Esfuerzos] = stress_shell_degenerado(nodos, Uel, E,v,t,v3)
 dofsxnod = 5;
 %% Constitutivo de degenerado
 t_mean = mean(t);
-D1 = E*t_mean^3/(12*(1 - v^2));
+D1 = E/(1 - v^2);
 G = 0.5*E/(1 + v);
-c = 1;%5/6;
+c = 5/6;
 
-D_fc = [   D1 v*D1  0   0   0
+D = [   D1 v*D1  0   0   0
       v*D1   D1  0   0   0
-          0     0  G*t_mean   0   0
-          0     0  0 c*G*t_mean   0
-          0     0  0   0 c*G*t_mean ];
-
-D_m = E*t_mean/(1-v^2)*[1 v 0 0 0;
-                        v 1 0 0 0];
-
-D = [D_m;D_fc];
+          0     0  G   0   0
+          0     0  0 c*G   0
+          0     0  0   0 c*G ];
 
 Ds = zeros(size(D));
 Ds(1:3,1:3)= D(1:3,1:3);
 Dc = zeros(size(D));
 Dc(4:end,4:end) = D(4:end,4:end);
 
-C_b = E/(1-v^2)*[1 v 0;
-                 v 1 0;
-                 0 0 (1-v)/2];
-C_s = c*G*[1 0; 0 1];
 
 %% Isoparametrico
 cant_puntos = 4;
@@ -79,10 +70,12 @@ for i = 1:cant_puntos
         case 4
             x1=4; x2=3; y1=1; y2=4;
     end
+    
     v1 = (nodos(x2,:)-nodos(x1,:))/norm(nodos(x2,:)-nodos(x1,:));
     aux = v3(:,i)';
-    v2 = cross(aux,v1);
-
+    v2 = cross(aux,v1)/norm(cross(aux,v1));
+    v1 = cross(v2,aux);
+   
     v(:,:,i) = [v1;v2;aux]'; %v1 es vector fila
 end%i
 %% Stress en 0,0
@@ -90,18 +83,27 @@ end%i
 tt = [t; t; t];
 v3t = (v3.*tt)';
     
-B_0 = B_local(nodos,A,v,v3t,t,0,0,0);
+B_bot = B_local(nodos,A,v,v3t,t,0,0,-1); %bottom
 
-B_1 = B_local(nodos,A,v,v3t,t,0,0,1);
+B_top = B_local(nodos,A,v,v3t,t,0,0,1);
+
+B_m = B_local(nodos,A,v,v3t,t,0,0,0);
 
     %% Esfuerzos
-    eps_000 = B_0*Uel; %def local
+    eps_bot = B_bot*Uel; %def local
 
-    eps_001 = (B_1-B_0)*Uel;
+    eps_top = B_top*Uel; %eps_x, eps_y, gam_xy, gam_xz, gam_zy
 
-    Momentos(1:2) = D(1:2,:)*eps_000; %eps_x eps_y esp_xy esp
-    Momentos(3:5) = D(3:5,:)*eps_001; 
-    Momentos(6:7) = D(6:7,:)*eps_000;
+    eps_m = B_m*Uel;
+
+    Tensiones_bot =  D*eps_bot;
+    Tensiones_top =  D*eps_top;
+    Tensiones_m = D*eps_m;
+
+    Momentos(1:2) = (Tensiones_bot(1:2)+Tensiones_top(1:2))*t_mean/2;
+    Momentos(3:5) = (Tensiones_bot(1:3)-Tensiones_top(1:3))*t_mean^2/12; 
+    Momentos(6:7) = Tensiones_m(4:5)*t_mean;
+    %(Tensiones_bot(4:5)+Tensiones_top(4:5))*t_mean/2;
 
     Esfuerzos = Momentos;
 

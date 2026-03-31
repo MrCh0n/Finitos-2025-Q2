@@ -142,6 +142,7 @@ for i = 1:nelem
     v3_el = v3(:,nodoid);
     
     Uel = U(dir);
+    
     %esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
     esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
 end
