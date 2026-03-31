@@ -99,10 +99,19 @@ B_m = B_local(nodos,A,v,v3t,t,0,0,0);
     Tensiones_bot =  D*eps_bot;
     Tensiones_top =  D*eps_top;
     Tensiones_m = D*eps_m;
-
+    
+    Momentos = zeros(1,7);
     Momentos(1:2) = (Tensiones_bot(1:2)+Tensiones_top(1:2))*t_mean/2;
-    Momentos(3:5) = (Tensiones_bot(1:3)-Tensiones_top(1:3))*t_mean^2/12; 
-    Momentos(6:7) = Tensiones_m(4:5)*t_mean;
+    Momentos(3:5) = (Tensiones_bot(1:3)-Tensiones_top(1:3))*t_mean^2/12;
+
+    dz = t_mean/2;
+    [w,puntos,n] = gauss(2);
+    for i = 1:n
+        B = B_local(nodos,A,v,v3t,t,0,0,puntos(i));
+        sigmac = D*B*Uel;
+        Momentos(6:7) = Momentos(6:7)+sigmac(3:4)'*dz*w(i);
+    end
+    Momentos(6:7)'-Tensiones_m(3:4)*t_mean
     %(Tensiones_bot(4:5)+Tensiones_top(4:5))*t_mean/2;
 
     Esfuerzos = Momentos;

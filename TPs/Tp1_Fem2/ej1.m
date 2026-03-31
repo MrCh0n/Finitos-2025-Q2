@@ -1,8 +1,7 @@
-% Main del trabajo practico 1
+function [wB,Nx_p,My_p,Qy_p] = ej1(type,div)
+%type: tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-% clc
-% clear all
-% close all
+%div: cuantas divisiones en cada  lado
 %% Datos del problema
 E = 4.32e8; %psi
 v = 0;
@@ -15,10 +14,6 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
-
-div = 16; %cuantas divisiones en cada  lado
-
 switch type
     case 1 %Mindlin
         mesh = Mindlin(L,R,tita,div,div,E,v,t);
@@ -61,14 +56,9 @@ dir = div:div:nelem; %son los ultimos elementos de cada fila
 Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
 My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
 Qy_p = esfuerzos(dir,6);
-figure(5)
-plot(Nx_p)
-figure(6)
-plot(My_p)
-figure(7)
-plot(Qy_p)
 %% Graficar
 mesh.dibujar;
 
 %% Valores del benchmark
 wB = mesh.U(mesh.dofs(mesh.counts.nnod,3));%el ultimo nodo en z
+end

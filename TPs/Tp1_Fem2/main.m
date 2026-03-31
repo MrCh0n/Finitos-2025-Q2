@@ -18,7 +18,7 @@ q = -90; %psi
 %% Control
 type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 8; %cuantas divisiones en cada  lado
+div = 16; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
@@ -152,7 +152,12 @@ dir = div:div:nelem; %son los ultimos elementos de cada fila
 Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
 My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
 Qy_p = esfuerzos(dir,6);
-
+figure(5)
+plot(Nx_p)
+figure(6)
+plot(My_p)
+figure(7)
+plot(Qy_p)
 
 %% Funciones
 

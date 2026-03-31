@@ -85,6 +85,27 @@ classdef Degenerado < handle
             mesh.U(mesh.free) = Kr\Rr;
         end
 
+        function [esfuerzos] = esfuerzo(mesh)
+            nelem = mesh.counts.nelem;
+            E = mesh.material.E;
+            v = mesh.material.v;
+            T = mesh.material.t;
+            esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
+            for i = 1:nelem
+                nodoid = mesh.elems(i,:);
+            
+                dir = mesh.dofs(nodoid,:);
+                dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+            
+                Coord = mesh.nodes(nodoid,:);
+                v3_el = mesh.v3(:,nodoid);
+                
+                Uel = mesh.U(dir);
+                
+                esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
+            end
+        end
+
         function dibujar(mesh)
             dofselem = 5;
             ndof = mesh.counts.ndof;
