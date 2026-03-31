@@ -90,11 +90,50 @@ end%i
 tt = [t; t; t];
 v3t = (v3.*tt)';
     
-xi = 0;
-eta = 0;
-zeta = 0;
+B_0 = B_local(nodos,A,v,v3t,t,0,0,0);
 
+B_1 = B_local(nodos,A,v,v3t,t,0,0,1);
 
+    %% Esfuerzos
+    eps_000 = B_0*Uel; %def local
+
+    eps_001 = (B_1-B_0)*Uel;
+
+    Momentos(1:2) = D(1:2,:)*eps_000; %eps_x eps_y esp_xy esp
+    Momentos(3:5) = D(3:5,:)*eps_001; 
+    Momentos(6:7) = D(6:7,:)*eps_000;
+
+    Esfuerzos = Momentos;
+
+end
+
+%% funciones
+function [T] = giro_B(J)
+    % J es el jacobiano
+    % sistema de coordenadas local 123 en [ksi eta zeta]
+    % size 5x6
+    dir1 = J(1,:);
+    dir3 = cross(dir1,J(2,:));
+    dir2 = cross(dir3,dir1);
+
+    M1 = [ dir1/norm(dir1); dir2/norm(dir2); dir3/norm(dir3) ];
+    M2 = [ M1(:,2), M1(:,3), M1(:,1) ];
+    M3 = [ M1(2,:); M1(3,:); M1(1,:) ];
+    M4 = [ M2(2,:); M2(3,:); M2(1,:) ];
+
+    T11 = M1.^2;
+    T12 = M1.*M2;
+    T21 = 2*M1.*M3;
+    T22 = M1.*M4 + M3.*M2;
+
+    T = [ T11 T12
+          T21 T22 ];
+    T(3,:) = [];
+end
+
+function [B] = B_local(nodos,A,v,v3t,t,xi,eta,zeta)
+dofsxnod = 5;
+cant_puntos = 4;
 N = [1, xi, eta, xi*eta]*A;
 Nxi = [0, 1, 0, eta]*A;
 Neta = [0, 0, 1, xi]*A;
@@ -132,60 +171,9 @@ for inod = 1:cant_puntos
     fin = ini + dofsxnod - 1;
     B(:,ini:fin) = [aux1 aux2];
 end%inod
-v1 = squeeze(v(:,1,:))';
-v1 = N*v1;
-v2 = squeeze(v(:,2,:))';
-v2 = N*v2;
-v3 = N*v3';
-
-R = [v1;v2;v3];
-L(1:3,1:3) = R;
-L(4:5,4:5) = R(1:2,1:2);
-
-T = zeros(5*4);
-for i=1:4
-    T((i-1)*5+1:i*5, (i-1)*5+1:i*5) = L;
-end
-%cambiar el U a los locales, (x,y,z) da igual al de Mindlin
-%Uel = T*Uel;
 
 % Esto gira B al global y lo pasa de 6x20 a 5x20 no se si se tiene que rotar al global
 T2 = giro_B(J);
 
 B = T2*B; %esta B es en locales
-
-    %% Esfuerzos
-    eps_000 = B*Uel; %def local
-
-    eps_001 = 
-
-    Momentos = D*eps; %eps_x eps_y esp_xy esp
-
-
-    Esfuerzos = Momentos;
-
-end
-
-%% funciones
-function [T] = giro_B(J)
-    % J es el jacobiano
-    % sistema de coordenadas local 123 en [ksi eta zeta]
-    % size 5x6
-    dir1 = J(1,:);
-    dir3 = cross(dir1,J(2,:));
-    dir2 = cross(dir3,dir1);
-
-    M1 = [ dir1/norm(dir1); dir2/norm(dir2); dir3/norm(dir3) ];
-    M2 = [ M1(:,2), M1(:,3), M1(:,1) ];
-    M3 = [ M1(2,:); M1(3,:); M1(1,:) ];
-    M4 = [ M2(2,:); M2(3,:); M2(1,:) ];
-
-    T11 = M1.^2;
-    T12 = M1.*M2;
-    T21 = 2*M1.*M3;
-    T22 = M1.*M4 + M3.*M2;
-
-    T = [ T11 T12
-          T21 T22 ];
-    T(3,:) = [];
 end
