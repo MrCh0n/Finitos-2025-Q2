@@ -57,7 +57,7 @@ Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
 My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
 Qy_p = esfuerzos(dir,6);
 %% Graficar
-mesh.dibujar;
+%mesh.dibujar;
 
 %% Valores del benchmark
 wB = mesh.U(mesh.dofs(mesh.counts.nnod,3));%el ultimo nodo en z

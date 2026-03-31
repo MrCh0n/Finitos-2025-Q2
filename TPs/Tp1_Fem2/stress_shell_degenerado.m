@@ -111,7 +111,8 @@ B_m = B_local(nodos,A,v,v3t,t,0,0,0);
         sigmac = D*B*Uel;
         Momentos(6:7) = Momentos(6:7)+sigmac(3:4)'*dz*w(i);
     end
-    Momentos(6:7)'-Tensiones_m(3:4)*t_mean
+    %Momentos(6:7)'-Tensiones_m(3:4)*t_mean; % era para corroborar si daba
+    %lo mismo de las dos maneras
     %(Tensiones_bot(4:5)+Tensiones_top(4:5))*t_mean/2;
 
     Esfuerzos = Momentos;
