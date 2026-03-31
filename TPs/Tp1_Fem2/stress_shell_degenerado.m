@@ -32,14 +32,21 @@ function [Esfuerzos] = stress_shell_degenerado(nodos, Uel, E,v,t,v3)
 % 1 - - - 2 
 dofsxnod = 5;
 %% Constitutivo de degenerado
-D1 = E/(1 - v^2);
+t_mean = mean(t);
+D1 = E*t_mean^3/(12*(1 - v^2));
 G = 0.5*E/(1 + v);
-c = 5/6;
-D = [   D1 v*D1  0   0   0
+c = 1;%5/6;
+
+D_fc = [   D1 v*D1  0   0   0
       v*D1   D1  0   0   0
-          0     0  G   0   0
-          0     0  0 c*G   0
-          0     0  0   0 c*G ];
+          0     0  G*t_mean   0   0
+          0     0  0 c*G*t_mean   0
+          0     0  0   0 c*G*t_mean ];
+
+D_m = E*t_mean/(1-v^2)*[1 v 0 0 0;
+                        v 1 0 0 0];
+
+D = [D_m;D_fc];
 
 Ds = zeros(size(D));
 Ds(1:3,1:3)= D(1:3,1:3);
@@ -85,7 +92,8 @@ v3t = (v3.*tt)';
     
 xi = 0;
 eta = 0;
-zeta = 1;
+zeta = 0;
+
 
 N = [1, xi, eta, xi*eta]*A;
 Nxi = [0, 1, 0, eta]*A;
@@ -139,44 +147,25 @@ for i=1:4
     T((i-1)*5+1:i*5, (i-1)*5+1:i*5) = L;
 end
 %cambiar el U a los locales, (x,y,z) da igual al de Mindlin
-Uel = T*Uel;
+%Uel = T*Uel;
 
 % Esto gira B al global y lo pasa de 6x20 a 5x20 no se si se tiene que rotar al global
 T2 = giro_B(J);
 
-%B = T2*B;
+B = T2*B; %esta B es en locales
 
-    %% Tension
-    z = zeta*t(1)/2; % calculamos a altura t/2 (deberiamos tmb calcularlo a -t/2)
-    % OOJJJOOOOO
+    %% Esfuerzos
+    eps_000 = B*Uel; %def local
 
-    eps = B*Uel
-    eps = L*eps;
+    eps_001 = 
 
-    S = diag([-z -z -z 1 1]);
-    C = zeros(5);
-    C(1:3,1:3) = C_b;
-    C(4:5,4:5)= C_s;
+    Momentos = D*eps; %eps_x eps_y esp_xy esp
 
-    eps_m = eps(1:3);   % membrana
-    kappa = eps(1:3);   % (si están incluidas como tales)
-    gamma = eps(4:5);
 
-    %Stress = C*S*eps; %sxx syy sxy
-    Stress(1:3) = C_b*(eps_m + z*kappa);
-    Stress(4:5)   = C_s*gamma;
+    Esfuerzos = Momentos;
 
-    % Momentos(1:3) = Ds(1:3,1:3)*eps(1:3);
-    % 
-    % Momentos(4:5) = Dc(4:5,4:5)*eps(4:5);
-
-    Momentos = D*eps;
-
-    Esfuerzos(1) = Stress(1)*t(1);
-    Esfuerzos(2) = Stress(2)*t(1);
-    
-    Esfuerzos = [Esfuerzos Momentos'];
 end
+
 %% funciones
 function [T] = giro_B(J)
     % J es el jacobiano

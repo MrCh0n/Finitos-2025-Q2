@@ -63,8 +63,8 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     v3_el = v3(:,nodoid);
     
-    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
     %Kel = crearK(nodos(nodoid,:),E,v,T);
+    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -142,8 +142,8 @@ for i = 1:nelem
     v3_el = v3(:,nodoid);
     
     Uel = U(dir);
-    esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
-    %esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
+    %esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+    esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
 end
 
 % plotear en linea AB
