@@ -16,7 +16,7 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 div = 8; %cuantas divisiones en cada  lado
 
@@ -63,8 +63,8 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     v3_el = v3(:,nodoid);
     
-    %Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
-    Kel = crearK(nodos(nodoid,:),E,v,T);
+    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
+    %Kel = crearK(nodos(nodoid,:),E,v,T);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -138,9 +138,11 @@ for i = 1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
 
     Coord = nodos(nodoid,:);
+    v3_el = v3(:,nodoid);
     
     Uel = U(dir);
     esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+    %esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
 end
 
 % plotear en linea AB
