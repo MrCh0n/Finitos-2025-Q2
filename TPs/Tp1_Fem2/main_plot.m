@@ -5,7 +5,7 @@ clear all
 close all
 
 %% Malla
-div = 16; %en que division ver los esfuerzos
+div = 8; %en que division ver los esfuerzos
 divisiones = [2,4,8,16];
 
 wBs = zeros(4,2);
@@ -43,7 +43,7 @@ title('Convergencia de w_B');
 
 %ylim([-0.55 -0.20]);
 set(gca, 'YDir', 'reverse'); % Invertir eje si prefieres ver la deflexión hacia abajo
-set(gca, 'Box', 'on', 'TickDir', 'in', 'LineWidth', 1);
+%set(gca, 'Box', 'on', 'TickDir', 'in', 'LineWidth', 1);
 
 % Leyenda
 legend('Referencia', 'Cáscara plana Mindlin', 'Cáscara 3D Degenerada', 'Location','northeast');
@@ -65,6 +65,7 @@ plot(tita, Nxs(:,2), 'd-.r', 'LineWidth', 1.2, 'MarkerFaceColor', 'w');
 xlabel('\theta [º]')
 ylabel("N_{x'} [lb/in]")
 legend('Referencia', 'Cáscara plana Mindlin', 'Cáscara 3D Degenerada', 'Location','northeast');
+title("Esfuerzo N_{x'} a lo largo de A-B")
 
 hold off;
 
@@ -81,6 +82,7 @@ plot(tita, Mys(:,2), 'd-.r', 'LineWidth', 1.2, 'MarkerFaceColor', 'w');
 xlabel('\theta [º]')
 ylabel("M_{y'} [lb in/in]")
 legend('Referencia', 'Cáscara plana Mindlin', 'Cáscara 3D Degenerada', 'Location', 'northeast');
+title("Esfuerzo M_{y'} a lo largo de A-B")
 
 hold off;
 
@@ -96,5 +98,6 @@ plot(tita, Qys(:,2), 'd-.r', 'LineWidth', 1.2, 'MarkerFaceColor', 'w');
 xlabel('\theta [º]')
 ylabel("Q_{y'} [lb/in]")
 legend('Referencia', 'Cáscara plana Mindlin', 'Cáscara 3D Degenerada', 'Location', 'northeast');
+title("Esfuerzo Q_{y'} a lo largo de A-B")
 
 hold off;

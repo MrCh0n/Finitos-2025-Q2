@@ -152,12 +152,12 @@ dir = div:div:nelem; %son los ultimos elementos de cada fila
 Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
 My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
 Qy_p = esfuerzos(dir,6);
-figure(5)
-plot(Nx_p)
-figure(6)
-plot(My_p)
-figure(7)
-plot(Qy_p)
+% figure(5)
+% plot(Nx_p)
+% figure(6)
+% plot(My_p)
+% figure(7)
+% plot(Qy_p)
 
 %% Funciones
 
