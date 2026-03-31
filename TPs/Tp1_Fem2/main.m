@@ -130,24 +130,28 @@ hold off
 wB = U(dofs(nnod,3)); %el ultimo nodo en z
 
 %% Tensiones
-% esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
-% for i = 1:nelem
-%     nodoid = elems(i,:);
-% 
-%     dir = dofs(nodoid,:);
-%     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
-% 
-%     Coord = nodos(nodoid,:);
-% 
-%     Uel = U(dir);
-%     esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
-% end
-% 
-% % plotear en linea AB
-% dir = div:div:nelem; %son los ultimos elementos de cada fila
-% Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
-% My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
-% Qy_p = esfuerzos(dir,6);
+
+esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
+for i = 1:nelem
+    nodoid = elems(i,:);
+
+    dir = dofs(nodoid,:);
+    dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+
+    Coord = nodos(nodoid,:);
+    v3_el = v3(:,nodoid);
+    
+    Uel = U(dir);
+    esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+    %esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
+end
+
+% plotear en linea AB
+dir = div:div:nelem; %son los ultimos elementos de cada fila
+Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
+My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
+Qy_p = esfuerzos(dir,6);
+
 
 %% Funciones
 
