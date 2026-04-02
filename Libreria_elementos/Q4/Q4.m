@@ -72,11 +72,35 @@ classdef Q4 < handle
             mesh.U(mesh.free) = Kr\Rr;
         end
 
-        function dibujar(mesh)
-            max_U = max(mesh.U);
-            porciento = 5/100;
-            mult = mesh.counts.L/max_U*porciento;
-            plot_Q4(mesh.nodes, mesh.U,mult);
+        function [escala] = dibujar(mesh,porcien)
+           % pasar el porcentaje al que se quiere dibujar la deformada
+            % devuelve cuanto se tuvo que escalar
+            
+            max_U = max(abs(mesh.U));
+            porciento = porcien/100;
+            escala = mesh.counts.L/max_U*porciento;
+            %plot_LST(mesh.nodes,mesh.U,mult);
+            
+            dofselem = 2;
+            ndof = mesh.counts.ndof;
+            % sin deformar
+            figure(2)
+            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
+            hold off
+
+            % Deformada
+            x = mesh.nodes(:,1);
+            y = mesh.nodes(:,2);
+ 
+            x_deformada = x + escala*mesh.U(1:dofselem:ndof);
+            y_deformada = y + escala*mesh.U(2:dofselem:ndof);
+            nodos_deformada = [x_deformada y_deformada];
+            
+            figure(3)
+            draw_Mesh(mesh.elems,mesh.nodes,'Type','Q4','Color','b')
+            hold on
+            draw_Mesh(mesh.elems,nodos_deformada,'Type','Q4','Color','k')
+            hold off
         end
     end
 

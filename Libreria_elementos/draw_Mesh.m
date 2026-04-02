@@ -2,6 +2,7 @@ function draw_Mesh(Elem,Nodos,options)
 % Sirve para dibujar el Mesh con las coordenadas en Nodos y Elementos. 
 % Para dibujar la deformada se puede reemplazar Nodos con Deformada 
 
+
 arguments
     Elem (:, :) {mustBeInteger}
     Nodos (:, :) {mustBeNumeric}
@@ -12,107 +13,88 @@ arguments
     options.MarkerSize (1, 1) {mustBeInteger} = 10;
     options.DisplayName {mustBeText} = '';
     options.LineWidth {mustBeNumeric} = 2;
-    options.Type {mustBeText} = ''; %para decir que es LST o Q8
+    options.Type {mustBeText} = '';
 end
 
 color = options.Color;
 linewidth = options.LineWidth;
-nel = size(Elem,1);
-nnel = size(Elem,2);
-xx = zeros(nnel,1);
-yy = zeros(nnel,1);
-zz = zeros(nnel,1);
 
-%% Cambiar orden con Type
+[nel,nnel] = size(Elem);
+
+%% Reordenamiento vectorizado
 if strcmp(options.Type, 'LST')
-    for i=1:nel %cant de elementos
-        Elem(i,:) = Elem(i,[1 4 2 5 3 6]);
-    end
+    Elem = Elem(:,[1 4 2 5 3 6]);
 elseif strcmp(options.Type, 'Q8')
-    for i=1:nel %cant de elementos
-        Elem(i,:) = Elem(i,[1 5 2 6 3 7 4 8]);
-    end
+    Elem = Elem(:,[1 5 2 6 3 7 4 8]);
 end
-
 
 hold on
 
-% 2D
-if size(Nodos,2) == 2
-    for k = 1:nel
-        clear xx
-        clear yy
-        for i = 1:nnel
-            xx(i) = Nodos(Elem(k,i),1);
-            yy(i) = Nodos(Elem(k,i),2);
-            if options.NodeLabel
-                text(xx(i),yy(i),num2str(Elem(k,i)),'VerticalAlignment','bottom','Color',color,'FontSize',options.FontSize);
-            end
-        end
-        xx = [xx xx(1)];
-        yy = [yy yy(1)];
-        if linewidth == 0
-            p = scatter3(xx,yy,zz, pi*options.MarkerSize^2/4, 'Color', color, 'Marker', 'o','MarkerFaceColor',color,'MarkerEdgeColor',color);
-        else
-            p = plot(xx,yy, 'LineWidth', linewidth,'Color', color, 'Marker', 'o','MarkerFaceColor',color,'MarkerEdgeColor',color,'MarkerSize',options.MarkerSize);
-        end
-        if ~isempty(options.DisplayName) && k == nel
-            set(p, 'DisplayName', options.DisplayName)
-        else
-            set(p, 'HandleVisibility', 'off');
-        end
-        x = mean(Nodos(Elem(k,:),1));
-        y = mean(Nodos(Elem(k,:),2));
-        if options.ElementLabel
-            text(x,y,num2str(k),'EdgeColor','k','Color','k','FontSize',18);
-        end
+%% LABELS DE NODOS
+if options.NodeLabel
+    if size(Nodos,2)==2
+        text(Nodos(:,1), Nodos(:,2), ...
+            string(1:size(Nodos,1)), ...
+            'Color',color,'FontSize',options.FontSize);
+    else
+        text(Nodos(:,1), Nodos(:,2), Nodos(:,3), ...
+            string(1:size(Nodos,1)), ...
+            'Color',color,'FontSize',options.FontSize);
     end
-    
-    grid on
-    % axis equal
-    xlabel('x')
-    ylabel('y')
-    hold off
+end
 
-% 3D (Elementos planos
-elseif size(Nodos,2) ==3
-    for k = 1:nel
-        clear xx
-        clear yy
-        clear zz
-        for i = 1:nnel
-            xx(i) = Nodos(Elem(k,i),1);
-            yy(i) = Nodos(Elem(k,i),2);
-            zz(i) = Nodos(Elem(k,i),3);
-            if options.NodeLabel
-                text(xx(i),yy(i),zz(i),num2str(Elem(k,i)),'VerticalAlignment','bottom','Color',color,'FontSize',options.FontSize);
-            end
-        end
-        xx = [xx xx(1)];
-        yy = [yy yy(1)];
-        zz = [zz zz(1)];
+%% DIBUJO DE ELEMENTOS
+for k = 1:nel
+    
+    nodes = Elem(k,:);
+    
+    coords = Nodos(nodes,:);
+    coords = [coords; coords(1,:)]; % cerrar
+    
+    if size(Nodos,2)==2
         if linewidth == 0
-            p = scatter3(xx,yy,zz, pi*options.MarkerSize^2/4, 'Color', color, 'Marker', 'o','MarkerFaceColor',color,'MarkerEdgeColor',color);
+            p = scatter(coords(:,1),coords(:,2), ...
+                pi*options.MarkerSize^2/4, ...
+                'MarkerFaceColor',color,'MarkerEdgeColor',color);
         else
-            p = plot3(xx,yy,zz,'LineWidth', linewidth,'Color', color, 'Marker', 'o','MarkerFaceColor',color,'MarkerEdgeColor',color,'MarkerSize',options.MarkerSize);
+            p = plot(coords(:,1),coords(:,2), ...
+                'LineWidth',linewidth,'Color',color, ...
+                'Marker','o','MarkerFaceColor',color, ...
+                'MarkerSize',options.MarkerSize);
         end
-        if ~isempty(options.DisplayName) && k == nel
-            set(p, 'DisplayName', options.DisplayName)
-        else
-            set(p, 'HandleVisibility', 'off');
-        end
-        x = mean(Nodos(Elem(k,:),1));
-        y = mean(Nodos(Elem(k,:),2));
-        z = mean(Nodos(Elem(k,:),3));
+        
         if options.ElementLabel
-            text(x,y,z,num2str(k),'EdgeColor','k','Color','k','FontSize',18);
+            c = mean(coords(1:end-1,:),1);
+            text(c(1),c(2),num2str(k),'Color','k');
+        end
+        
+    else
+        if linewidth == 0
+            p = scatter3(coords(:,1),coords(:,2),coords(:,3), ...
+                pi*options.MarkerSize^2/4, ...
+                'MarkerFaceColor',color,'MarkerEdgeColor',color);
+        else
+            p = plot3(coords(:,1),coords(:,2),coords(:,3), ...
+                'LineWidth',linewidth,'Color',color, ...
+                'Marker','o','MarkerFaceColor',color, ...
+                'MarkerSize',options.MarkerSize);
+        end
+        
+        if options.ElementLabel
+            c = mean(coords(1:end-1,:),1);
+            text(c(1),c(2),c(3),num2str(k),'Color','k');
         end
     end
     
-    grid on
-    % axis equal
-    xlabel('x')
-    ylabel('y')
-    zlabel('z')
-    hold off
+    if ~isempty(options.DisplayName) && k == nel
+        set(p,'DisplayName',options.DisplayName)
+    else
+        set(p,'HandleVisibility','off');
+    end
+end
+
+grid on
+xlabel('x'); ylabel('y');
+if size(Nodos,2)==3, zlabel('z'); end
+hold off
 end

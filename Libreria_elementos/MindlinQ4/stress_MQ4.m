@@ -100,8 +100,8 @@ function [Stress,Momentos] = stress_MQ4(Coord, Uel, E,v,t)
     C = zeros(5);
     C(1:3,1:3) = C_b;
     C(4:5,4:5)= C_s;
-   
-    Stress = C*S*eps; %sxx syy sxy
+
+    Stress = t*C*S*eps; %Nx Ny xy
 
     Momentos(1:3) = D_b*eps(1:3);
 

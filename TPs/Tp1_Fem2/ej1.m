@@ -1,4 +1,5 @@
 function [wB,Nx_p,My_p,Qy_p] = ej1(type,div)
+%hecho con clases para hacer mas facil el cambio entre Mindlin y Degenerado
 %type: tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 %div: cuantas divisiones en cada  lado
