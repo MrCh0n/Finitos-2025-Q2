@@ -1,4 +1,4 @@
-function [nodos, elems] = mallador_triang_CST(bordes,divX,divY)
+function [nodos, elems, borde] = mallador_triang_CST(bordes,divX,divY)
 %mallador de elementos CST para un cuadrilatero
 %
 %bordes es una matrix de (4,2) de los nodos limitantes al cuadrilatero
@@ -6,19 +6,29 @@ function [nodos, elems] = mallador_triang_CST(bordes,divX,divY)
 %divx es la cantidad de elementos en la direccion x
 %divy es la cantidad de elementos en la direccion y
 %
-%poner los nodos en bordes como:
-% 4 - - - 3
-% |       |
-% |       |
-% |       |
-% 1 - - - 2 
+% Salidas
+% nodos es una lista de las coordenadas de los nodos
+% elems es una lista de indices a los nodos de los elementos [ (divX)*(divy), 8 ]
+% bordes es un struct con los nodos de los 4 lados para hacer las condiciones de borde
+%  - borde.lados_12
+%  - borde.lados_23
+%  - borde.lados_34
+%  - borde.lados_41
+%
+%poner los nodos como:
+%    3
+%   / \
+%  /   \
+% /     \
+%1 - - - 2 
     divX = divX + 1;
     divY = divY + 1;
 
     disX = linspace(-1,1,divX);
     disY = linspace(-1,1,divY);
-
-    nodos = zeros(divX*divY,2);
+    
+    nnod = divX*divY;
+    nodos = zeros(nnod,2);
 
     x1 = [-1; 1; 1; -1];
     y1 = [-1; -1; 1; 1];
@@ -49,4 +59,9 @@ function [nodos, elems] = mallador_triang_CST(bordes,divX,divY)
             elems(offset_elems+2*j,:) = [offset+j offset+j+padding offset+j+padding+1];%los que se ven para abajo
         end
     end
+
+    borde.lado_12 = 1:padding:nnod;
+    borde.lado_23 = nnod-padding+1:nnod;
+    borde.lado_34 = padding:padding:nnod;
+    borde.lado_41 = 1:padding;
 end

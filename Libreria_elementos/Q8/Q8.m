@@ -4,6 +4,7 @@ classdef Q8 < handle
         elems
         dofs
         free
+        bordes
         U
         K
         R
@@ -13,7 +14,7 @@ classdef Q8 < handle
 
     methods
         function mesh = Q8(bordes,divx,divy,C)
-            [mesh.nodes, mesh.elems] = mallador_cuadrado_Q8(bordes,divx,divy);
+            [mesh.nodes, mesh.elems, mesh.bordes] = mallador_cuadrado_Q8(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodes,1);
             mesh.counts.ndof = mesh.counts.nnod*2;
@@ -85,7 +86,7 @@ classdef Q8 < handle
             ndof = mesh.counts.ndof;
             % sin deformar
             figure(2)
-            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
+            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q8','Color','b')
             hold off
 
             % Deformada

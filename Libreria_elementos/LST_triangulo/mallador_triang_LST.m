@@ -1,4 +1,26 @@
-function [nodos, elems] = mallador_triang_LST(bordes,divX,divY)
+function [nodos, elems, borde] = mallador_triang_LST(bordes,divX,divY)
+%mallador de elementos LST para un cuadrilatero
+%
+%bordes es una matrix de (4,2) de los nodos limitantes al cuadrilatero
+%
+%divx es la cantidad de elementos en la direccion x
+%divy es la cantidad de elementos en la direccion y
+%
+% Salidas
+% nodos es una lista de las coordenadas de los nodos
+% elems es una lista de indices a los nodos de los elementos [ (divX)*(divy), 8 ]
+% bordes es un struct con los nodos de los 4 lados para hacer las condiciones de borde
+%  - borde.lados_12
+%  - borde.lados_23
+%  - borde.lados_34
+%  - borde.lados_41
+%
+%poner los nodos como:
+%    3
+%   / \
+%  6   5
+% /     \
+%1 - 4 - 2 
     divX = divX + 1;
     divY = divY + 1;
 
@@ -88,7 +110,13 @@ function [nodos, elems] = mallador_triang_LST(bordes,divX,divY)
         
         elems(i,4:6) = [indice4 indice5 indice6];
 
-
     end
-
+    id = 2:2*(divY-1):nelem;
+    borde.lado_12 = sort(unique(reshape(elems(id,[1 2 4]),1,[])));
+    id = nelem-(2*(divY-2)):2:nelem;
+    borde.lado_23 = sort(unique(reshape(elems(id,[2 3 5]),1,[])));
+    id = 2*(divY-1)-1:2*(divY-1):nelem;
+    borde.lado_34 = sort(unique(reshape(elems(id,[2 3 5]),1,[])));
+    id = 1:2:2*(divY-1)-1;
+    borde.lado_41 = sort(unique(reshape(elems(id,[1 3 6]),1,[])));
 end

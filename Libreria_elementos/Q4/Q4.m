@@ -4,6 +4,7 @@ classdef Q4 < handle
         elems
         dofs
         free
+        bordes
         U
         K
         R
@@ -13,7 +14,7 @@ classdef Q4 < handle
 
     methods
         function mesh = Q4(bordes,divx,divy,C)
-            [mesh.nodes, mesh.elems] = mallador_cuadrado_Q4(bordes,divx,divy);
+            [mesh.nodes, mesh.elems, mesh.bordes] = mallador_cuadrado_Q4(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodes,1);
             mesh.counts.ndof = mesh.counts.nnod*2;

@@ -4,6 +4,7 @@ classdef LST < handle
         elems
         dofs
         free
+        bordes
         U
         K
         R
@@ -13,7 +14,7 @@ classdef LST < handle
 
     methods
         function mesh = LST(bordes,divx,divy,C)
-            [mesh.nodes, mesh.elems] = mallador_triang_LST(bordes,divx,divy);
+            [mesh.nodes, mesh.elems, mesh.bordes] = mallador_triang_LST(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodes,1);
             mesh.counts.ndof = mesh.counts.nnod*2;
@@ -85,7 +86,7 @@ classdef LST < handle
             ndof = mesh.counts.ndof;
             % sin deformar
             figure(2)
-            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
+            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','LST','Color','b')
             hold off
 
             % Deformada

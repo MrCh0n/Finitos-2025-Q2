@@ -84,16 +84,13 @@ end
 
 % Condiciones de borde
 % talvez se puede hacer mas facil, es empotrados en la parte de abajo
-borde_inferior = mesh.nodes(:,2)==0;
-for i = 1:mesh.counts.nnod
-   if borde_inferior(i)
-    mesh.cond_borde(i,3);
-   end
-end
+borde_inferior = mesh.bordes.lado_12;
+mesh.cond_borde(borde_inferior,3);
 
 % Calculo y plot
 mesh.calc_U;
 
 %Dibuja ~50% de escala del modelo
 mult = mesh.dibujar(porcentaje);
+hold off
 end
