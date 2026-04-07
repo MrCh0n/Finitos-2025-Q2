@@ -32,6 +32,14 @@ classdef CST < handle
         end
 
         function mesh = armar_K(mesh)
+            dofselem = 6;
+            nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
+            
+            I = zeros(nnz,1);
+            J = zeros(nnz,1);
+            V = zeros(nnz,1);
+            cont = 1;
+
             for i = 1:mesh.counts.nelem
                 nodoid = mesh.elems(i,:);
 
@@ -41,8 +49,18 @@ classdef CST < handle
 
                 dir = reshape(mesh.dofs(nodoid,:)',1,[]);
 
-                mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
-            end
+                %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
+                for a = 1:dofselem
+                    for b = 1:dofselem
+                        I(cont) = dir(a);
+                        J(cont) = dir(b);
+                        V(cont) = Kel(a,b);
+                        cont = cont+1;
+                    end%b
+                end%a
+            end%i
+            
+            mesh.K = sparse(I,J,V); 
         end
 
         function mesh = armar_R(mesh, i, carga_s, carga_v, type)

@@ -23,6 +23,7 @@ cant_puntos = 3;
 x1 = [0; 1; 0];
 y1 = [0; 0; 1];
 A = [ones(cant_puntos,1) x1 y1];
+A = inv(A);
 
 
 %% Gauss
@@ -38,8 +39,8 @@ B = zeros(3,cant_puntos);
 K = 0;
 
 for i = 1:orden
-    Neta = [0, 1, 0]/A;
-    Nzeta = [0, 0, 1]/A;
+    Neta = [0, 1, 0]*A;
+    Nzeta = [0, 0, 1]*A;
     
     D = [Neta; Nzeta];
 

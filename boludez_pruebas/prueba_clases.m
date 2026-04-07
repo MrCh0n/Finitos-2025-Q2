@@ -16,8 +16,8 @@ bordes = [0 0;
           a a;
           0 a];
 
-divx = 5;
-divy = 5;
+divx = 10;
+divy = 10;
 
 %% Q4
 cant_puntos = 4;
@@ -71,7 +71,6 @@ volumen = [zeros(cant_puntos,1) -ones(cant_puntos,1)];
 
 llamar_funciones(mesh,carga,volumen,50);
 
-
 %% funciones
 function [] = llamar_funciones(mesh,carga,volumen,porcentaje)
 mesh.armar_K;
@@ -91,6 +90,6 @@ mesh.cond_borde(borde_inferior,3);
 mesh.calc_U;
 
 %Dibuja ~50% de escala del modelo
-mult = mesh.dibujar(porcentaje);
+%mult = mesh.dibujar(porcentaje);
 hold off
 end

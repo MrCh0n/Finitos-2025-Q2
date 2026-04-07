@@ -189,6 +189,5 @@ function [carga_s] = girar_carga(nodos, carga_s, A, puntos_eta, puntos_zeta, dir
             giro = [tangencial' normal']/norm(tangencial);
             
             carga_s(nodo_linea(i,:)) =  carga_s(nodo_linea(i,:))*giro;
-            carga_s(nodo_linea(i,:))*giro;
     end% i
 end

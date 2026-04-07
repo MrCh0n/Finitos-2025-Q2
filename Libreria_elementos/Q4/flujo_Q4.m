@@ -5,11 +5,13 @@ function [Uel, Vel] = flujo_Q4(coord, Tel, k)
     x1 = [-1; 1; 1; -1];
     y1 = [-1; -1; 1; 1];
     A = [ones(cant_puntos,1) x1 y1 x1.*y1];
+    A = inv(A);
     
     %iso para extrapolar las tensiones en puntos de Gauss/superonvergentes
     x2 = [-1; 1; 1; -1];
     y2 = [-1; -1; 1; 1];
     A_rs = [ones(4,1) x2 y2 x2.*y2];
+    A_rs = inv(A_rs);
     
     r = x1*sqrt(3);%las esquinas de xi eta
     s = y1*sqrt(3);
@@ -25,8 +27,8 @@ function [Uel, Vel] = flujo_Q4(coord, Tel, k)
     for i = 1:cant
         offset = (i-1)*cant;
         for j = 1:cant
-            Neta = [0, 1, 0 puntos(j)]/A;
-            Nzeta = [0, 0, 1, puntos(i)]/A;
+            Neta = [0, 1, 0 puntos(j)]*A;
+            Nzeta = [0, 0, 1, puntos(i)]*A;
 
             D = [Neta; Nzeta];
 
@@ -44,7 +46,7 @@ function [Uel, Vel] = flujo_Q4(coord, Tel, k)
     Vel = 0;
     
     for j = 1:cant_puntos
-        N = [1 r(j) s(j) r(j)*s(j)]/A_rs;
+        N = [1 r(j) s(j) r(j)*s(j)]*A_rs;
         Uel = Uel + N*flujo_rs(:,1);%sumo todos los flujos en x en los nodos del elemento
         Vel = Vel + N*flujo_rs(:,2);%sumo todos los flujos en y los nodos del elemento
     end
