@@ -1,22 +1,22 @@
 classdef Q4 < handle
     properties
-        nodes
+        nodos
         elems
-        dofs
-        free
         bordes
         U
         K
+        M
         R
-        C
+        vibraciones
+        material
         counts
     end
 
     methods
         function mesh = Q4(bordes,divx,divy,C)
-            [mesh.nodes, mesh.elems, mesh.bordes] = mallador_cuadrado_Q4(bordes,divx,divy);
+            [mesh.nodos.coordenadas, mesh.elems, mesh.bordes] = mallador_cuadrado_Q4(bordes,divx,divy);
 
-            mesh.counts.nnod = size(mesh.nodes,1);
+            mesh.counts.nnod = size(mesh.nodos.coordenadas,1);
             mesh.counts.ndof = mesh.counts.nnod*2;
             mesh.counts.nelem = size(mesh.elems,1);
             mesh.counts.L = norm(bordes(2,:)-bordes(1,:))/divx;
@@ -24,10 +24,10 @@ classdef Q4 < handle
             mesh.R = zeros(mesh.counts.ndof, 1);
             mesh.U = zeros(mesh.counts.ndof, 1);
 
-            mesh.C = C;
+            mesh.material.C = C;
 
-            mesh.dofs = reshape(1:mesh.counts.ndof,2,[])';
-            mesh.free = true(mesh.counts.nnod,2);
+            mesh.nodos.dofs = reshape(1:mesh.counts.ndof,2,[])';
+            mesh.nodos.free = true(mesh.counts.nnod,2);
         end
 
         function mesh = armar_K(mesh)
@@ -42,11 +42,11 @@ classdef Q4 < handle
             for i = 1:mesh.counts.nelem
                 nodoid = mesh.elems(i,:);
 
-                nodos = mesh.nodes(nodoid,:);
+                coord = mesh.nodos.coordenadas(nodoid,:);
 
-                Kel = crearK_Q4(nodos, mesh.C);
+                Kel = crearK_Q4(coord, mesh.material.C);
 
-                dir = reshape(mesh.dofs(nodoid,:)',1,[]);
+                dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
 
                 %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
                 for a = 1:dofselem
@@ -65,29 +65,80 @@ classdef Q4 < handle
         function mesh = armar_R(mesh, i, carga_s, carga_v, type)
                 nodoid = mesh.elems(i,:);
 
-                nodos = mesh.nodes(nodoid,:);
+                coord = mesh.nodos.coordenadas(nodoid,:);
 
-                Rel = carga_Q4(nodos, carga_s, carga_v, "coordenada", type);
+                Rel = carga_Q4(coord, carga_s, carga_v, "coordenada", type);
 
-                dir = reshape(mesh.dofs(nodoid,:)',1,[]);
+                dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
 
                 mesh.R(dir) = mesh.R(dir) + Rel;
         end
 
         function mesh = cond_borde(mesh, nodos, restricciion)
             if restricciion == 3
-                mesh.free(nodos,:) = false;
+                mesh.nodos.free(nodos,:) = false;
             else
-                mesh.free(nodos, restricciion) = false;
+                mesh.nodos.free(nodos, restricciion) = false;
             end
         end
 
-        function mesh = calc_U(mesh)
-            mesh.free = reshape(mesh.free', 1, []);
-            Kr = mesh.K(mesh.free, mesh.free);
-            Rr = mesh.R(mesh.free);
+        function mesh = armar_M(mesh,p)
+            mesh.material.rho = p;
+            dofselem = 8;
+            nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
+            
+            I = zeros(nnz,1);
+            J = zeros(nnz,1);
+            V = zeros(nnz,1);
+            cont = 1;
 
-            mesh.U(mesh.free) = Kr\Rr;
+            for i = 1:mesh.counts.nelem
+                nodoid = mesh.elems(i,:);
+
+                coord = mesh.nodos.coordenadas(nodoid,:);
+
+                Mel = masa_Q4(coord, mesh.material.rho,1);
+
+                dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
+
+                %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
+                for a = 1:dofselem
+                    for b = 1:dofselem
+                        I(cont) = dir(a);
+                        J(cont) = dir(b);
+                        V(cont) = Mel(a,b);
+                        cont = cont+1;
+                    end%b
+                end%a
+            end
+
+            mesh.M = sparse(I,J,V);
+        end
+
+        function mesh = calc_U(mesh)
+            free = reshape(mesh.nodos.free', 1, []);
+            Kr = mesh.K(free, free);
+            Rr = mesh.R(free);
+
+            mesh.U(free) = Kr\Rr;
+        end
+
+        function mesh = calc_frecuencias(mesh)
+            free = reshape(mesh.nodos.free', 1, []);
+            ndof = mesh.counts.ndof;
+            Kr = mesh.K(free, free);
+            Mr = mesh.M(free,free);
+            
+            k=20;
+            [Avec,Aval] = eigs(Kr,Mr,k,'smallestabs');
+            nodos_libres = size(Aval,1);
+            % Extraer los valores propios y vectores propios
+            [f_n,idx]= sort(sqrt(diag(Aval)) / (2 * pi)); % Frecuencias naturales en Hz
+            mesh.vibraciones.modos = zeros(nodos_libres,ndof); %menos la cantidad de restricciones
+            mesh.vibraciones.modos(:,free) = Avec(:,idx)'; % Modos de vibración
+            
+            
+            mesh.vibraciones.frecuencias = f_n;
         end
 
         function [escala] = dibujar(mesh,porcien)
@@ -102,20 +153,20 @@ classdef Q4 < handle
             dofselem = 2;
             ndof = mesh.counts.ndof;
             % sin deformar
-            figure(2)
-            draw_Mesh(mesh.elems,mesh.nodes, 'NodeLabel',true,'Type','Q4','Color','b')
+            figure()
+            draw_Mesh(mesh.elems,mesh.nodos.coordenadas, 'NodeLabel',true,'Type','Q4','Color','b')
             hold off
 
             % Deformada
-            x = mesh.nodes(:,1);
-            y = mesh.nodes(:,2);
+            x = mesh.nodos.coordenadas(:,1);
+            y = mesh.nodos.coordenadas(:,2);
  
             x_deformada = x + escala*mesh.U(1:dofselem:ndof);
             y_deformada = y + escala*mesh.U(2:dofselem:ndof);
             nodos_deformada = [x_deformada y_deformada];
             
-            figure(3)
-            draw_Mesh(mesh.elems,mesh.nodes,'Type','Q4','Color','b')
+            figure()
+            draw_Mesh(mesh.elems,mesh.nodos.coordenadas,'Type','Q4','Color','b')
             hold on
             draw_Mesh(mesh.elems,nodos_deformada,'Type','Q4','Color','k')
             hold off
