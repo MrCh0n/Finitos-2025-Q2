@@ -13,13 +13,12 @@ L = 600; %in
 t = 3 ; %in
 tita = 90; %grados
 
-q = -90; %psi
-P = 1;%lbf
+P = 1/4;%lbf
 
 %% Control
-type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 50; %cuantas divisiones en cada  lado
+div = 16; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
@@ -68,7 +67,7 @@ mesh.cargar_R(R);
 mesh.calc_U;
 
 %% Graficar
-mesh.dibujar;
+%mesh.dibujar;
 
 %% Valores del benchmark
 wB = mesh.U(cargas) %el ultimo nodo en z

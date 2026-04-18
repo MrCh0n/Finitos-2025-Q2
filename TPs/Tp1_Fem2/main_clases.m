@@ -15,7 +15,7 @@ tita = 40; %grados
 q = -90; %psi
 
 %% Control
-type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
+type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 div = 16; %cuantas divisiones en cada  lado
 
@@ -25,7 +25,7 @@ switch type
         sym_yz = [1 5 6];
         sym_xz = [2 4 6];
     case 2
-        mesh = Degenerado(L,R,tita,div,div,E,v,t);
+        mesh = DegeneradoQ8(L,R,tita,div,div,E,v,t);
         sym_yz = [1 5];
         sym_xz = [2 4];
 end
