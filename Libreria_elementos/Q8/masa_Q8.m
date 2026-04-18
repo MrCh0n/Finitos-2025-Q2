@@ -65,8 +65,8 @@ end
 [w, puntos, n] = gauss([3,3]);
 
 M=0;
-dir1 = 1:2:8;
-dir2 = 2:2:8;
+dir1 = 1:2:16;
+dir2 = 2:2:16;
 for i = 1:n
         N = [1, puntos(i,1), puntos(i,2), puntos(i,1)^2, puntos(i,1)*puntos(i,2),  puntos(i,2)^2,  puntos(i,2)^2* puntos(i,2),  puntos(i,1)* puntos(i,2)^2]*A;
 

@@ -40,7 +40,7 @@ end
 meshQ4.armar_K;
 
 %masa
-meshQ4.armar_M(rho);
+meshQ4.armar_M(rho*t);
 
 % Condiciones de borde
 borde_inferior = meshQ4.bordes.lado_12;
@@ -51,15 +51,7 @@ meshQ4.cond_borde(borde_inferior(end),2);%apoyo simple
 meshQ4.calc_U;
 meshQ4.calc_frecuencias;
 
-figure()
-hold on
-color = ['r','g','b','k'];
-for i = [1 2 4]
-x = meshQ4.vibraciones.modos(i,1:2:end)'+meshQ4.nodos.coordenadas(:,1);
-y = meshQ4.vibraciones.modos(i,2:2:end)'+meshQ4.nodos.coordenadas(:,2);
-coord = [x y];
-draw_Mesh(meshQ4.elems,coord,'Type','Q4','Color',color(i))
-end
+meshQ4.dibujar_frecuencias;
 
 %% Q8
 cant_puntos = 8;
@@ -79,7 +71,7 @@ end
 meshQ8.armar_K;
 
 %masa
-meshQ8.armar_M(rho);
+meshQ8.armar_M(rho*t);
 
 % Condiciones de borde
 borde_inferior = meshQ8.bordes.lado_12;
@@ -90,15 +82,7 @@ meshQ8.cond_borde(borde_inferior(end),2);%apoyo simple
 meshQ8.calc_U;
 meshQ8.calc_frecuencias;
 
-figure()
-hold on
-color = ['r','g','b','k'];
-for i = [1 2 4]
-x = meshQ8.vibraciones.modos(i,1:2:end)'+meshQ8.nodos.coordenadas(:,1);
-y = meshQ8.vibraciones.modos(i,2:2:end)'+meshQ8.nodos.coordenadas(:,2);
-coord = [x y];
-draw_Mesh(meshQ8.elems,coord,'Type','Q8','Color',color(i))
-end
+meshQ8.dibujar_frecuencias;
 
 %% Viga
 
@@ -160,6 +144,8 @@ nodos_libres = size(Aval,1);
 modos = zeros(nodos_libres,ndof); %menos la cantidad de restricciones
 modos(:,free) = Avec(:,idx)'; % Modos de vibración
 
+
+color = ['r','g','b','k'];
 figure()
 hold on
 for i = 1:3

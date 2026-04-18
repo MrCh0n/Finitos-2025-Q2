@@ -171,6 +171,19 @@ classdef Q4 < handle
             draw_Mesh(mesh.elems,nodos_deformada,'Type','Q4','Color','k')
             hold off
         end
+        
+        function mesh = dibujar_frecuencias(mesh)
+            figure()
+            hold on
+            color = ['r','g','b','k'];
+            for i = [1 2 3]
+                x = mesh.vibraciones.modos(i,1:2:end)'+mesh.nodos.coordenadas(:,1);
+                y = mesh.vibraciones.modos(i,2:2:end)'+mesh.nodos.coordenadas(:,2);
+                coord = [x y];
+                draw_Mesh(mesh.elems,coord,'Type','Q4','Color',color(i))
+            end
+        end
+    
     end
 
 
