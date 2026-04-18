@@ -44,7 +44,7 @@ K = 0;
 
 for i = 1:n
         Neta = [0, 1, 0 2*puntos(i,1), puntos(i,2), 0, 2*puntos(i,1)*puntos(i,2), puntos(i,2)^2]*A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,1)]*A;%derivada de N en zeta
+        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,2)]*A;%derivada de N en zeta
         
         D = [Neta; Nzeta];
     
