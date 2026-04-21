@@ -4,3 +4,6 @@
 [submodule "TPs/Tp_1_Finitos"]
 	path = TPs/Tp_1_Finitos
 	url = git@github.com:MrCh0n/Tp_1_Finitos.git
+[submodule "TPs/Tp3"]
+	path = TPs/Tp3
+	url = git@github.com:MrCh0n/Tp3_Finitos.git

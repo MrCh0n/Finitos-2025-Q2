@@ -5,7 +5,7 @@ clear all
 close all
 
 %% Malla
-div = 16; %en que division ver los esfuerzos
+div = 8; %en que division ver los esfuerzos
 divisiones = [2,4,8,16];
 
 wBs = zeros(4,2);

@@ -19,8 +19,8 @@ bordes = [0 0;
           L W;
           0 W];
 
-divx = 10;
-divy = 1;
+divx = 20;
+divy = 3;
 
 %% Q4
 cant_puntos = 4;
@@ -44,9 +44,11 @@ meshQ4.armar_M(rho*t);
 
 % Condiciones de borde
 borde_inferior = meshQ4.bordes.lado_12;
-meshQ4.cond_borde(borde_inferior(1),3);%apooyo fijo
-meshQ4.cond_borde(borde_inferior(end),2);%apoyo simple
+borde_izquierdo = meshQ4.bordes.lado_41;
+%meshQ4.cond_borde(borde_inferior(1),3);%apooyo fijo
+%meshQ4.cond_borde(borde_inferior(end),2);%apoyo simple
 
+meshQ4.cond_borde(borde_izquierdo,3);%ampotrado
 % Calculo
 meshQ4.calc_U;
 meshQ4.calc_frecuencias;
@@ -75,8 +77,12 @@ meshQ8.armar_M(rho*t);
 
 % Condiciones de borde
 borde_inferior = meshQ8.bordes.lado_12;
-meshQ8.cond_borde(borde_inferior(1),3);%apooyo fijo
-meshQ8.cond_borde(borde_inferior(end),2);%apoyo simple
+borde_izquierdo = meshQ8.bordes.lado_41;
+%meshQ8.cond_borde(borde_inferior(1),3);%apooyo fijo
+%meshQ8.cond_borde(borde_inferior(end),2);%apoyo simple
+
+meshQ8.cond_borde(borde_izquierdo(1),3);%ampotrado
+% Calculo
 
 % Calculo
 meshQ8.calc_U;
@@ -108,7 +114,7 @@ dofs = reshape(1:ndof,2,[])';
 free = true(nnod,2);
 
 free(1,:) = false;
-free(end,1) = false;
+%free(end,1) = false;
 free = reshape(free', 1, []);
 
 R = zeros(ndof,1);
@@ -164,3 +170,5 @@ fprintf("primeras 3 frecuencias Viga, Q4, Q8")
 f_n(1:3)
 meshQ4.vibraciones.frecuencias(1:3)
 meshQ8.vibraciones.frecuencias(1:3)
+
+ sqrt(E/rho/L^2)

@@ -43,27 +43,30 @@ B = zeros(3,2*cant_puntos);
 K = 0;
 
 for i = 1:n
-        Neta = [0, 1, 0 2*puntos(i,1), puntos(i,2), 0, 2*puntos(i,1)*puntos(i,2), puntos(i,2)^2]*A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,2)]*A;%derivada de N en zeta
+    xi = puntos(i,1);
+    eta = puntos(i,2);
+
+    Neta = [0, 1, 0, 2*xi, eta, 0, 2*xi*eta, eta^2]*A;%derivada de N en eta en los puntos de Gauss
+    Nzeta = [0, 0, 1, 0, xi, 2*eta, xi^2, 2*xi*eta]*A;%derivada de N en zeta
+    
+    D = [Neta; Nzeta];
+
+    J = D*nodos;
+
+    Bs = J\D;
         
-        D = [Neta; Nzeta];
+    Bx = Bs(1,:);
+    By = Bs(2,:);
+    %crear la matrz B
+    B(1,dir1) = Bx;
+    B(2,dir2) = By;
+    B(3,dir1) = By;
+    B(3,dir2) = Bx;
+
+    %mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
+    %Kmin = B'*C*B;%matriz a integrar
     
-        J = D*nodos;
-    
-        Bs = J\D;
-            
-        Bx = Bs(1,:);
-        By = Bs(2,:);
-        %crear la matrz B
-        B(1,dir1) = Bx;
-        B(2,dir2) = By;
-        B(3,dir1) = By;
-        B(3,dir2) = Bx;
-    
-        %mult = abs(det(J))*w(i)*w(j);%pesos y cambio de area abs por si es negativo el Jacobiano
-        %Kmin = B'*C*B;%matriz a integrar
-        
-        K = K + B'*C*B*abs(det(J))*w(i);%Kmin*mult;
+    K = K + B'*C*B*abs(det(J))*w(i);%Kmin*mult;
 end% i
 
 end
