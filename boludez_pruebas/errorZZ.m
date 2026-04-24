@@ -6,8 +6,6 @@ addpath(genpath(pwd+"/../Libreria_elementos"))
 E = 200e9;
 t = 1;
 v = 0.3;
-%Plain stress
-C = t*E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
 
 a = 1;
 
@@ -16,17 +14,17 @@ bordes = [0 0;
           a a;
           0 a];
 
-divx = 10;
-divy = 10;
+divx = 20;
+divy = 20;
 
 %% mashado
-cant_puntos = 4;
+cant_puntos = 8;
 
 % creo el mesh y calculo la K
-mesh = Q4(bordes,divx,divy,C);
+mesh = Q8(bordes,divx,divy,E,v,t,"stress");
 
 % hacer la carga
-carga = zeros(4,4);
+carga = zeros(4,6);
 
 volumen = [zeros(cant_puntos,1) -ones(cant_puntos,1)];
 

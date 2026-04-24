@@ -127,6 +127,53 @@ classdef Q8 < handle
             mesh.M = sparse(I,J,V);
         end
 
+        function mesh = calc_errorzz(mesh)
+            cant_puntos = 8;
+            suavizado = zeros(mesh.counts.nnod,3);%exx,eyy,exy
+            deformaciones = zeros(mesh.counts.nnod,3*cant_puntos);
+            cont = zeros(mesh.counts.nnod,3);
+
+            for i = 1:mesh.counts.nelem
+                nodosid = mesh.elems(i,:);
+
+                coord = mesh.nodos.coordenadas(nodosid,:);
+
+                dir = reshape(mesh.nodos.dofs(nodosid,:)',1,[]);
+
+                Uel = mesh.U(dir);
+
+                epsilon_el = deformaciones_Q8(coord, Uel);
+
+                deformaciones(i,:) = epsilon_el';
+
+                suavizado(nodosid,:) = suavizado(nodosid,:) + reshape(epsilon_el,3,[])';
+                cont(nodosid,:) = cont(nodosid,:) + 1;
+            end
+
+            suavizado = suavizado./cont;
+            
+            mesh.error.U = 0;
+            mesh.error.E = 0;
+            for i = 1:mesh.counts.nelem
+                nodosid = mesh.elems(i,:);
+
+                coord = mesh.nodos.coordenadas(nodosid,:);
+
+                e_el = deformaciones(i,:);
+                e2_el = reshape(suavizado(nodosid,:)',1,[])-e_el;
+
+                Uel = energia_Q8(coord, e_el, mesh.material.C);
+
+                Eel = energia_Q8(coord, e2_el, mesh.material.C);
+                
+                mesh.error.U = mesh.error.U + Uel;
+                mesh.error.E = mesh.error.E + Eel;
+            end
+            mesh.error.zz = sqrt(mesh.error.E/(mesh.error.E+mesh.error.U));
+            mesh.campos.deformaciones.bruto = deformaciones;
+            mesh.campos.deformaciones.suavizado = suavizado;
+        end
+        
         function mesh = calc_U(mesh)
             free = reshape(mesh.nodos.free', 1, []);
             Kr = mesh.K(free, free);

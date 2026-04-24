@@ -43,8 +43,11 @@ if lumped
 
 Area = 0;
 for i = 1:n
-        Neta = [0, 1, 0 2*puntos(i,1), puntos(i,2), 0, 2*puntos(i,1)*puntos(i,2), puntos(i,2)^2]*A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,1)]*A;%derivada de N en zeta
+        xi = puntos(i,1);
+        eta = puntos(i,2);
+    
+        Neta = [0, 1, 0, 2*xi, eta, 0, 2*xi*eta, eta^2]*A;%derivada de N en eta en los puntos de Gauss
+        Nzeta = [0, 0, 1, 0, xi, 2*eta, xi^2, 2*xi*eta]*A;%derivada de N en zeta
 
         D = [Neta; Nzeta];
 
@@ -68,10 +71,13 @@ M=0;
 dir1 = 1:2:16;
 dir2 = 2:2:16;
 for i = 1:n
-        N = [1, puntos(i,1), puntos(i,2), puntos(i,1)^2, puntos(i,1)*puntos(i,2),  puntos(i,2)^2,  puntos(i,2)^2* puntos(i,2),  puntos(i,1)* puntos(i,2)^2]*A;
-
-        Neta = [0, 1, 0 2*puntos(i,1), puntos(i,2), 0, 2*puntos(i,1)*puntos(i,2), puntos(i,2)^2]*A;%derivada de N en eta en los puntos de Gauss
-        Nzeta = [0, 0, 1, 0, puntos(i,1), 2*puntos(i,2), puntos(i,1)^2, 2*puntos(i,1)*puntos(i,2)]*A;%derivada de N en zeta
+        xi = puntos(i,1);
+        eta = puntos(i,2);
+    
+        N = [1, xi, eta, xi^2, xi*eta,  eta^2,  xi^2*eta,  xi*eta^2]*A;
+    
+        Neta = [0, 1, 0, 2*xi, eta, 0, 2*xi*eta, eta^2]*A;%derivada de N en eta en los puntos de Gauss
+        Nzeta = [0, 0, 1, 0, xi, 2*eta, xi^2, 2*xi*eta]*A;%derivada de N en zeta
 
         D = [Neta; Nzeta];
 
