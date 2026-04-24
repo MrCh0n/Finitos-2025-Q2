@@ -50,7 +50,7 @@ mesh.calc_U;
 %mult = mesh.dibujar(porcentaje);
 hold off
 
-mesh.errorzz;
+mesh.calc_errorzz;
 mesh.error.zz
 % dofselem = 8;
 % suavizado = zeros(mesh.counts.nnod,3);%exx,eyy,exy

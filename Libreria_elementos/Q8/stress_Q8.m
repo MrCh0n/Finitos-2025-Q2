@@ -1,7 +1,7 @@
 function [Stress] = stress_Q8(Coord, Uel, C, Czz)
 %Stress = stress_Q8(Coord, Uel, C, Czz)
 %
-%Devuelve las tensiones promediadas de los nodos
+%Devuelve las tension promediada de los nodos
 %Devuelve un vector de 6 numeros
 %
 %Stress(1) es la tension xx
@@ -29,12 +29,13 @@ function [Stress] = stress_Q8(Coord, Uel, C, Czz)
 
     Stress = zeros(1,6); %[xx yy xy principales] Stress(6) es zz
     
-    % isoparametrico
+    %% isoparametrico
     cant_puntos = 8;
     
     x1 = [-1; 1; 1; -1; 0; 1; 0; -1];
     y1 = [-1; -1; 1; 1; -1; 0; 1; 0];
     A = [ones(cant_puntos,1) x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
+    A = inv(A);
     
     %iso para extrapolar las tensiones en puntos de Gauss/superonvergentes
     x2 = [-1; 1; 1; -1];
@@ -45,7 +46,8 @@ function [Stress] = stress_Q8(Coord, Uel, C, Czz)
     s = y1*sqrt(3);
 
     %donde quiero la tensiones
-    puntos = [-sqrt(1/3) sqrt(1/3)];
+    %% Gauss
+    [w, puntos, n] = gauss([2,2]);
      %toda la seccion superior se cambia junta
 
     dir1 = 1:2:2*cant_puntos;
@@ -54,13 +56,15 @@ function [Stress] = stress_Q8(Coord, Uel, C, Czz)
     cant = size(puntos,2);
     sigma_rs = zeros(cant^2,4);% (:,1) xx, 2 yy, 3 xy, 4 zz
     
+    Bel = zeros(3,2*cant_puntos);
     %tension en los puntos de Gauss
-    for i = 1:cant
-        offset = (i-1)*cant;
-        for j = 1:cant
-            Neta = [0, 1, 0 2*puntos(i), puntos(j), 0, 2*puntos(i)*puntos(j), puntos(j)^2]/A;%derivada de N en eta en los puntos de Gauss
-            Nzeta = [0, 0, 1, 0, puntos(i), 2*puntos(j), puntos(i)^2, 2*puntos(i)*puntos(j)]/A;%derivada de N en zeta
-                
+    for i = 1:n
+            xi = puntos(i,1);
+            eta = puntos(i,2);
+
+            Neta = [0, 1, 0, 2*xi, eta, 0, 2*xi*eta, eta^2]*A;%derivada de N en eta en los puntos de Gauss
+            Nzeta = [0, 0, 1, 0, xi, 2*eta, xi^2, 2*xi*eta]*A;%derivada de N en zeta
+            
             D = [Neta; Nzeta];
         
             J = D*Coord;
@@ -76,9 +80,8 @@ function [Stress] = stress_Q8(Coord, Uel, C, Czz)
             Bel(3,dir1) = By;
             Bel(3,dir2) = Bx;
         
-            sigma_rs(offset+j,1:3) = C*Bel*Uel; %sxx syy sxy
-            sigma_rs(offset+j,4) = Czz*Bel*Uel; %szz
-        end
+            sigma_rs(i, 1:3) = C*Bel*Uel; %sxx syy sxy
+            sigma_rs(i, 4) = Czz*Bel*Uel; %szz
     end
     
     sigma = zeros(1,4);

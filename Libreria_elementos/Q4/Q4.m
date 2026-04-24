@@ -9,12 +9,13 @@ classdef Q4 < handle
         R
         vibraciones
         material
+        campos
         counts
         error
     end
 
     methods
-        function mesh = Q4(bordes,divx,divy,C)
+        function mesh = Q4(bordes,divx,divy,E,v,t,tipo)
             [mesh.nodos.coordenadas, mesh.elems, mesh.bordes] = mallador_cuadrado_Q4(bordes,divx,divy);
 
             mesh.counts.nnod = size(mesh.nodos.coordenadas,1);
@@ -25,7 +26,17 @@ classdef Q4 < handle
             mesh.R = zeros(mesh.counts.ndof, 1);
             mesh.U = zeros(mesh.counts.ndof, 1);
 
-            mesh.material.C = C;
+            mesh.material.E = E;
+            mesh.material.v = v;
+            mesh.material.t = t;
+            
+            if upper(tipo) == "STRESS"
+                mesh.material.C = t*E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
+                mesh.material.Czz = zeros(1,3);
+            else
+                mesh.material.C = t*E/((1+v)*(1-2*v))*[1-v v 0;v 1-v 0;0 0 (1-2*v)/2];
+                mesh.material.Czz = E*v/(1+v)/(1-2*v)*[1,1,0];
+            end
 
             mesh.nodos.dofs = reshape(1:mesh.counts.ndof,2,[])';
             mesh.nodos.free = true(mesh.counts.nnod,2);
@@ -116,7 +127,7 @@ classdef Q4 < handle
             mesh.M = sparse(I,J,V);
         end
 
-        function mesh = errorzz(mesh)
+        function mesh = calc_errorzz(mesh)
             cant_puntos = 4;
             suavizado = zeros(mesh.counts.nnod,3);%exx,eyy,exy
             deformaciones = zeros(mesh.counts.nnod,3*cant_puntos);
@@ -159,6 +170,8 @@ classdef Q4 < handle
                 mesh.error.E = mesh.error.E + Eel;
             end
             mesh.error.zz = sqrt(mesh.error.E/(mesh.error.E+mesh.error.U));
+            mesh.campos.deformaciones.bruto = deformaciones;
+            mesh.campos.deformaciones.suavizado = suavizado;
         end
         
         function mesh = calc_U(mesh)
@@ -167,6 +180,31 @@ classdef Q4 < handle
             Rr = mesh.R(free);
 
             mesh.U(free) = Kr\Rr;
+        end
+
+        function mesh = calc_stress(mesh)
+            mesh.campos.stress.bruto = zeros(mesh.counts.nelem,7);
+            for i = 1:mesh.counts.nelem
+                nodoid = mesh.elems(i,:);
+        
+                dir = mesh.nodos.dofs(nodoid,:);
+                dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+            
+                Coord = mesh.nodos.coordenadas(nodoid,:);
+                
+                Uel = mesh.U(dir);
+                
+                sigmas = stress_Q4(Coord, Uel, mesh.material.C, mesh.material.Czz);
+        
+                s1 = sigmas(4);
+                s2 = sigmas(5);
+                s3 = sigmas(6);
+        
+                mesh.campos.stress.bruto(i,1:4) = sigmas([1 2 3 6]);
+                mesh.campos.stress.bruto(i,5) = max([s1 s2 s3]); %sigma_1
+                mesh.campos.stress.bruto(i,6) = min([s1 s2 s3]); %sigma_3
+                mesh.campos.stress.bruto(i,7) = sqrt(((s1-s2)^2+(s2-s3)^2+(s3-s1)^2)/2);%von Mises
+            end
         end
 
         function mesh = calc_frecuencias(mesh)
@@ -228,8 +266,7 @@ classdef Q4 < handle
                 coord = [x y];
                 draw_Mesh(mesh.elems,coord,'Type','Q4','Color',color(i))
             end
-        end
-    
+        end   
     end
 
 
