@@ -185,6 +185,9 @@ classdef Q4 < handle
 
         function mesh = calc_stress(mesh)
             mesh.campos.stress.bruto = zeros(mesh.counts.nelem,7);
+            mesh.campos.stress.bruto_nodal = zeros(mesh.counts.nnod, 7);
+            count = zeros(mesh.counts.nnod,1);
+
             for i = 1:mesh.counts.nelem
                 nodoid = mesh.elems(i,:);
         
@@ -205,19 +208,13 @@ classdef Q4 < handle
                 mesh.campos.stress.bruto(i,5) = max([s1 s2 s3]); %sigma_1
                 mesh.campos.stress.bruto(i,6) = min([s1 s2 s3]); %sigma_3
                 mesh.campos.stress.bruto(i,7) = sqrt(((s1-s2)^2+(s2-s3)^2+(s3-s1)^2)/2);%von Mises
-            end
-            
-            mesh.campos.stress.bruto_nodal = zeros(mesh.counts.nnod, 7);
-            for i = 1:mesh.counts.nelem
-                nodoid = mesh.elems(i,:);
-            
-                Coord = mesh.nodos.coordenadas(nodoid,:);
-
+                
                 stress = mesh.campos.stress.bruto(i,:);%7x1
 
                 stress_el = stress_elem_a_nodo(Coord, stress);
 
                 mesh.campos.stress.bruto_nodal(nodoid,:) = mesh.campos.stress.bruto_nodal(nodoid,:) + stress_el;
+                count(nodoid,:) = count(nodoid,:) + 1;
             end
 
             if ~isfield(mesh.campos,"Global_matrix")
@@ -225,6 +222,7 @@ classdef Q4 < handle
             end
 
             mesh.campos.stress.suavizado_nodal = mesh.campos.Global_matrix\mesh.campos.stress.bruto_nodal;
+            mesh.campos.stress.bruto_nodal = mesh.campos.stress.bruto_nodal./count;
         end
 
         function mesh = calc_frecuencias(mesh)
@@ -400,7 +398,7 @@ function [stress_el] = stress_elem_a_nodo(nodos, stress)
     
             J = D*nodos;
       
-            mult = abs(det(J))*w(i);
+            mult = w(i);
             Mmin = N'*stress;
             
             stress_el = stress_el + Mmin*mult;

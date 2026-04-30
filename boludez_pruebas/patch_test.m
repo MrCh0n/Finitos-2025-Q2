@@ -17,8 +17,8 @@ bordes = [0 0;
           L W;
           0 W];
 
-divx = 2;
-divy = 2;
+divx = 10;
+divy = 10;
 
 %% Mallador
 elemtype = upper('Q4');

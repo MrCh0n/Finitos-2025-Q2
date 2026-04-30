@@ -36,7 +36,7 @@ for i = 1:n
 
         J = D*nodos;
   
-        mult = abs(det(J))*w(i);
+        mult = w(i);
         Mmin = N'*N;
         
         M = M + Mmin*mult;
