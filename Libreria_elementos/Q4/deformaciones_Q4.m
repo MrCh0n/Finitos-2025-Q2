@@ -28,7 +28,7 @@ Bel = zeros(3,2*cant_puntos);
  
 dir1 = 1:2:2*cant_puntos;
 dir2 = 2:2:2*cant_puntos;
-epsilon = zeros(3*cant_puntos,1);
+epsilon = zeros(3,1);
 
 for i = 1:n
     Neta = [0, 1, 0 puntos(i,2)]*A;
@@ -53,6 +53,6 @@ for i = 1:n
 
     e(i,:) = Bel*Uel*mult;%epsilon del punto de gauss
     xy = e([1 2 3])';
-    epsilon = epsilon + [xy; xy; xy; xy];%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
+    epsilon = epsilon + xy;%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
 end% i 
 end

@@ -129,10 +129,9 @@ classdef Q4 < handle
         end
 
         function mesh = calc_errorzz(mesh)
-            cant_puntos = 4;
-            suavizado = zeros(mesh.counts.nnod,3);%exx,eyy,exy
-            deformaciones = zeros(mesh.counts.nnod,3*cant_puntos);
-            cont = zeros(mesh.counts.nnod,3);
+            deformaciones = zeros(mesh.counts.nelem,3);
+            mesh.campos.deformaciones.nodal_bruto = zeros(mesh.counts.nnod, 3);
+            count = zeros(mesh.counts.nnod,1);
 
             for i = 1:mesh.counts.nelem
                 nodosid = mesh.elems(i,:);
@@ -147,11 +146,18 @@ classdef Q4 < handle
 
                 deformaciones(i,:) = epsilon_el';
 
-                suavizado(nodosid,:) = suavizado(nodosid,:) + reshape(epsilon_el,3,[])';
-                cont(nodosid,:) = cont(nodosid,:) + 1;
+                stress_el = stress_elem_a_nodo(coord, epsilon_el');
+
+                mesh.campos.deformaciones.nodal_bruto(nodosid,:) = mesh.campos.deformaciones.nodal_bruto(nodosid,:) + stress_el;
+                count(nodosid,:) = count(nodosid,:) + 1;
             end
 
-            suavizado = suavizado./cont;
+            if ~isfield(mesh.campos,"Global_matrix")
+                mesh.campos.Global_matrix = armar_Global(mesh);
+            end
+
+            mesh.campos.deformaciones.nodal_suavizado = mesh.campos.Global_matrix\mesh.campos.deformaciones.nodal_bruto;
+            mesh.campos.deformaciones.nodal_bruto = mesh.campos.deformaciones.nodal_bruto./count;
             
             mesh.error.U = 0;
             mesh.error.E = 0;
@@ -160,8 +166,8 @@ classdef Q4 < handle
 
                 coord = mesh.nodos.coordenadas(nodosid,:);
 
-                e_el = deformaciones(i,:);
-                e2_el = reshape(suavizado(nodosid,:)',1,[])-e_el;
+                e_el = reshape(mesh.campos.deformaciones.nodal_bruto(nodosid,:)',1,[])
+                e2_el = reshape(mesh.campos.deformaciones.nodal_suavizado(nodosid,:)',1,[])-e_el
 
                 Uel = energia_Q4(coord, e_el, mesh.material.C);
 
@@ -172,7 +178,6 @@ classdef Q4 < handle
             end
             mesh.error.zz = sqrt(mesh.error.E/(mesh.error.E+mesh.error.U));
             mesh.campos.deformaciones.bruto = deformaciones;
-            mesh.campos.deformaciones.suavizado = suavizado;
         end
         
         function mesh = calc_U(mesh)

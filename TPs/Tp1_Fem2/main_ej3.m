@@ -18,7 +18,7 @@ P = 1/4;%lbf
 %% Control
 type = 1; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 16; %cuantas divisiones en cada  lado
+div = 100; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin

@@ -14,8 +14,8 @@ bordes = [0 0;
           a a;
           0 a];
 
-divx = 20;
-divy = 20;
+divx = 10;
+divy = 10;
 
 %% mashado
 cant_puntos = 8;
