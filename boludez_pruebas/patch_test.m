@@ -24,7 +24,7 @@ divy = 2;
 elemtype = upper('Q4');
 mesh = Q4(bordes,divx,divy,E,v,t,"stress");
 
-mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:) = 1.1*mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:);
+%mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:) = 1.1*mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:);
 
 switch elemtype
     case 'CST'
@@ -75,10 +75,9 @@ mesh.armar_K;
 mesh.calc_U;
 
 %% Graficos Deformacion
-mesh.dibujar(100);
+%mesh.dibujar(100);
 
 %% Tensiones
 mesh.calc_stress;
-%mesh.stress = mesh.funciones.stress(mesh,U);
 
-% print_Stress_plane(mesh,U)
+%mesh.dibujar_stress;

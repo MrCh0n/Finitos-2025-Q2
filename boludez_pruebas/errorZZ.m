@@ -46,7 +46,7 @@ mesh.calc_U;
 
 %Dibuja ~50% de escala del modelo
 %mult = mesh.dibujar(porcentaje);
-hold off
+%hold off
 
 mesh.calc_errorzz;
 mesh.error.zz

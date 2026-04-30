@@ -29,6 +29,7 @@ classdef Q4 < handle
             mesh.material.E = E;
             mesh.material.v = v;
             mesh.material.t = t;
+            mesh.material.rho = 1;
             
             if upper(tipo) == "STRESS"
                 mesh.material.C = t*E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
@@ -94,7 +95,7 @@ classdef Q4 < handle
             end
         end
 
-        function mesh = armar_M(mesh,p)
+        function mesh = armar_M(mesh,p,tipo)
             mesh.material.rho = p;
             dofselem = 8;
             nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
@@ -109,7 +110,7 @@ classdef Q4 < handle
 
                 coord = mesh.nodos.coordenadas(nodoid,:);
 
-                Mel = masa_Q4(coord, mesh.material.rho,1);
+                Mel = masa_Q4(coord, mesh.material.rho,tipo);
 
                 dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
 
@@ -205,6 +206,25 @@ classdef Q4 < handle
                 mesh.campos.stress.bruto(i,6) = min([s1 s2 s3]); %sigma_3
                 mesh.campos.stress.bruto(i,7) = sqrt(((s1-s2)^2+(s2-s3)^2+(s3-s1)^2)/2);%von Mises
             end
+            
+            mesh.campos.stress.bruto_nodal = zeros(mesh.counts.nnod, 7);
+            for i = 1:mesh.counts.nelem
+                nodoid = mesh.elems(i,:);
+            
+                Coord = mesh.nodos.coordenadas(nodoid,:);
+
+                stress = mesh.campos.stress.bruto(i,:);%7x1
+
+                stress_el = stress_elem_a_nodo(Coord, stress);
+
+                mesh.campos.stress.bruto_nodal(nodoid,:) = mesh.campos.stress.bruto_nodal(nodoid,:) + stress_el;
+            end
+
+            if ~isfield(mesh.campos,"Global_matrix")
+                mesh.campos.Global_matrix = armar_Global(mesh);
+            end
+
+            mesh.campos.stress.suavizado_nodal = mesh.campos.Global_matrix\mesh.campos.stress.bruto_nodal;
         end
 
         function mesh = calc_frecuencias(mesh)
@@ -267,7 +287,151 @@ classdef Q4 < handle
                 draw_Mesh(mesh.elems,coord,'Type','Q4','Color',color(i))
             end
         end   
+    
+        function mesh = dibujar_stress(mesh)
+            Stress = mesh.campos.stress.bruto;
+            %Dibujar graficos
+            cmap = jet(256);
+            
+            ncol = size(cmap,1);
+            Stressmax = max(Stress);
+            Stressmin = min(Stress);
+            
+            fig = zeros(7,1);
+
+            for i = 1:7
+                fig(i) = figure();
+            end
+
+            for i = 1:mesh.counts.nelem
+                nodoid = mesh.elems(i,:);%para ordenarlos
+            
+                Coord = mesh.nodos.coordenadas(nodoid,:);
+                
+                %sigma xx, yy, xy, zz , I , III vm
+                for j=1:7
+                    figure(fig(j));
+                    dif = (Stressmax(j) - Stressmin(j));
+                    if dif > 10
+                        t = (Stress(i,j) - Stressmin(j)) / dif;
+                    else
+                        t = 0.5; % si no hay diferencia de stress
+                    end
+                    idx = round(1 + t * (ncol-1));
+                    plot(polyshape(Coord), 'Facecolor', cmap(idx,:))
+                    hold on
+                end
+                
+            end
+            e = 1e-16;
+            
+            
+            figure(fig(1))
+            colormap(cmap)
+            clim([min(Stress(:,1))-e max(Stress(:,1))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{xx} [MPa]');
+            hold off
+            
+            figure(fig(2))
+            colormap(cmap)
+            clim([min(Stress(:,2))-e max(Stress(:,2))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{yy} [MPa]');
+            hold off
+            
+            figure(fig(3))
+            colormap(cmap)
+            clim([min(Stress(:,3))-e max(Stress(:,3))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{xy} [MPa]');
+            hold off
+            
+            figure(fig(4))
+            colormap(cmap)
+            clim([min(Stress(:,4))-e max(Stress(:,4))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{zz} [MPa]');
+            hold off
+        
+            figure(fig(5))
+            colormap(cmap)
+            clim([min(Stress(:,5))-e max(Stress(:,5))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{I} [MPa]');
+            hold off
+        
+            figure(fig(6))
+            colormap(cmap)
+            clim([min(Stress(:,6))-e max(Stress(:,6))+e]/1e6);
+            colorbar;
+            title('Tensión \sigma_{III} [MPa]');
+            hold off
+            
+            figure(fig(7))
+            colormap(cmap)
+            clim([min(Stress(:,7))-e max(Stress(:,7))+e]/1e6);
+            colorbar;
+            title("Von Minses");
+            hold off
+        end
+    end
+end
+
+function [stress_el] = stress_elem_a_nodo(nodos, stress)
+    %% creo el isoparametrico
+    cant_puntos = 4;
+    
+    x1 = [-1; 1; 1; -1];
+    y1 = [-1; -1; 1; 1];
+    A = [ones(cant_puntos,1) x1 y1 x1.*y1];
+    A=inv(A);
+    %% Gauss
+    [w, puntos, n] = gauss([2,2]);
+    
+    stress_el=0;
+    for i = 1:n
+            N = [1, puntos(i,1), puntos(i,2), puntos(i,1)*puntos(i,2)]*A;
+    
+            Neta = [0, 1, 0 puntos(i,2)]*A;
+            Nzeta = [0, 0, 1, puntos(i,1)]*A;
+    
+            D = [Neta; Nzeta];
+    
+            J = D*nodos;
+      
+            mult = abs(det(J))*w(i);
+            Mmin = N'*stress;
+            
+            stress_el = stress_el + Mmin*mult;
+    end% i
+end
+function M = armar_Global(mesh)
+    dofselem = 4;
+    nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
+    
+    I = zeros(nnz,1);
+    J = zeros(nnz,1);
+    V = zeros(nnz,1);
+    cont = 1;
+
+    for i = 1:mesh.counts.nelem
+        nodoid = mesh.elems(i,:);
+
+        coord = mesh.nodos.coordenadas(nodoid,:);
+
+        Mel = global_Q4(coord);
+
+        %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
+        for a = 1:dofselem
+            for b = 1:dofselem
+                I(cont) = nodoid(a);
+                J(cont) = nodoid(b);
+                V(cont) = Mel(a,b);
+                cont = cont+1;
+            end%b
+        end%a
     end
 
-
+    M = sparse(I,J,V);
 end
