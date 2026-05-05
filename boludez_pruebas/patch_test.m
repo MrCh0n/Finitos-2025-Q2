@@ -10,19 +10,19 @@ v = 0.2;
 rho = 2400;
 
 W = 1;
-L = 1;
+L = 100;
 
 bordes = [0 0;
           L 0;
           L W;
           0 W];
 
-divx = 10;
-divy = 6;
+divx = 2;
+divy = 2;
 
 %% Mallador
-elemtype = upper('Q4');
-mesh = Q4(bordes,divx,divy,E,v,t,"stress");
+elemtype = upper('Q8');
+mesh = Q8(bordes,divx,divy,E,v,t,"stress");
 
 %mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:) = 1.1*mesh.nodos.coordenadas(ceil(mesh.counts.nnod/2),:);
 
