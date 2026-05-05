@@ -44,34 +44,13 @@ classdef Q8 < handle
 
         function mesh = armar_K(mesh)
             dofselem = 16;
-            nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
-            
-            I = zeros(nnz,1);
-            J = zeros(nnz,1);
-            V = zeros(nnz,1);
-            cont = 1;
+            coord = mesh.nodos.coordenadas;
+            elem = mesh.elems;
+            dofs = mesh.nodos.dofs;
+            C = mesh.material.C;
+            funcion = @crearK_Q8;
 
-            for i = 1:mesh.counts.nelem
-                nodoid = mesh.elems(i,:);
-
-                coord = mesh.nodos.coordenadas(nodoid,:);
-
-                Kel = crearK_Q8(coord, mesh.material.C);
-
-                dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
-
-                %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
-                for a = 1:dofselem
-                    for b = 1:dofselem
-                        I(cont) = dir(a);
-                        J(cont) = dir(b);
-                        V(cont) = Kel(a,b);
-                        cont = cont+1;
-                    end%b
-                end%a
-            end%i
-            
-            mesh.K = sparse(I,J,V); 
+            mesh.K = armar_K_2D(coord, elem, dofs, dofselem, C, funcion);
         end
 
         function mesh = armar_R(mesh, i, carga_s, carga_v, type)
@@ -94,84 +73,43 @@ classdef Q8 < handle
             end
         end
 
-        function mesh = armar_M(mesh,p)
+        function mesh = armar_M(mesh, p, tipo)
             mesh.material.rho = p;
             dofselem = 16;
-            nnz = mesh.counts.nelem*dofselem^2;%si ningun nodo se repite se tienen esta cantidad de posibles no zeros
-            
-            I = zeros(nnz,1);
-            J = zeros(nnz,1);
-            V = zeros(nnz,1);
-            cont = 1;
+            coord = mesh.nodos.coordenadas;
+            elem = mesh.elems;
+            dofs = mesh.nodos.dofs;
+            funcion = @masa_Q8;
 
-            for i = 1:mesh.counts.nelem
-                nodoid = mesh.elems(i,:);
-
-                coord = mesh.nodos.coordenadas(nodoid,:);
-
-                Mel = masa_Q8(coord, mesh.material.rho,1);
-
-                dir = reshape(mesh.nodos.dofs(nodoid,:)',1,[]);
-
-                %mesh.K(dir,dir) = mesh.K(dir,dir) + Kel;
-                for a = 1:dofselem
-                    for b = 1:dofselem
-                        I(cont) = dir(a);
-                        J(cont) = dir(b);
-                        V(cont) = Mel(a,b);
-                        cont = cont+1;
-                    end%b
-                end%a
-            end
-
-            mesh.M = sparse(I,J,V);
+            mesh.M = armar_M_2D(coord, elem, dofs, dofselem, p, tipo, funcion);
         end
 
         function mesh = calc_errorzz(mesh)
-            cant_puntos = 8;
-            suavizado = zeros(mesh.counts.nnod,3);%exx,eyy,exy
-            deformaciones = zeros(mesh.counts.nelem,3*cant_puntos);
-            cont = zeros(mesh.counts.nnod,3);
-
-            for i = 1:mesh.counts.nelem
-                nodosid = mesh.elems(i,:);
-
-                coord = mesh.nodos.coordenadas(nodosid,:);
-
-                dir = reshape(mesh.nodos.dofs(nodosid,:)',1,[]);
-
-                Uel = mesh.U(dir);
-
-                epsilon_el = deformaciones_Q8(coord, Uel);
-
-                deformaciones(i,:) = epsilon_el';
-
-                suavizado(nodosid,:) = suavizado(nodosid,:) + reshape(epsilon_el,3,[])';
-                cont(nodosid,:) = cont(nodosid,:) + 1;
+            if ~isfield(mesh.campos,"stress")
+                mesh.calc_stress;
             end
+            coord = mesh.nodos.coordenadas;
+            elem = mesh.elems;
+            C = mesh.material.C;
+            C_inv = inv(mesh.material.C);
 
-            suavizado = suavizado./cont;
-            
-            mesh.error.U = 0;
-            mesh.error.E = 0;
-            for i = 1:mesh.counts.nelem
-                nodosid = mesh.elems(i,:);
+            stress_bruto = mesh.campos.stress.bruto(:,1:3)';
+            stress_n_bruto = mesh.campos.stress.bruto_nodal(:,1:3)';
+            stress_n_suave = mesh.campos.stress.suavizado_nodal(:,1:3)';
 
-                coord = mesh.nodos.coordenadas(nodosid,:);
+            bruto = (C_inv*stress_bruto)';%calculo la deformacion a partir de la tensiones
+            n_bruto = (C_inv*stress_n_bruto)';
+            n_suave = (C_inv*stress_n_suave)';
 
-                e_el = deformaciones(i,:);
-                e2_el = reshape(suavizado(nodosid,:)',1,[])-e_el;
+            mesh.campos.deformaciones.bruto = bruto;
+            mesh.campos.deformaciones.nodal_bruto = n_bruto;
+            mesh.campos.deformaciones.nodal_suavizado = n_suave;
 
-                Uel = energia_Q8(coord, e_el, mesh.material.C);
+            [zz, U, E] = error_zz_2D(coord, elem, n_bruto, n_suave, C, @energia_Q8);
 
-                Eel = energia_Q8(coord, e2_el, mesh.material.C);
-                
-                mesh.error.U = mesh.error.U + Uel;
-                mesh.error.E = mesh.error.E + Eel;
-            end
-            mesh.error.zz = sqrt(mesh.error.E/(mesh.error.E+mesh.error.U));
-            mesh.campos.deformaciones.bruto = deformaciones;
-            mesh.campos.deformaciones.suavizado = suavizado;
+            mesh.error.E = E;
+            mesh.error.U = U;
+            mesh.error.zz = zz;
         end
         
         function mesh = calc_U(mesh)
@@ -183,28 +121,23 @@ classdef Q8 < handle
         end
 
         function mesh = calc_stress(mesh)
-            mesh.campos.stress.bruto = zeros(mesh.counts.nelem,7);
-            for i = 1:mesh.counts.nelem
-                nodoid = mesh.elems(i,:);
-        
-                dir = mesh.nodos.dofs(nodoid,:);
-                dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
-            
-                Coord = mesh.nodos.coordenadas(nodoid,:);
-                
-                Uel = mesh.U(dir);
-                
-                sigmas = stress_Q8(Coord, Uel, mesh.material.C, mesh.material.Czz);
-        
-                s1 = sigmas(4);
-                s2 = sigmas(5);
-                s3 = sigmas(6);
-        
-                mesh.campos.stress.bruto(i,1:4) = sigmas([1 2 3 6]);
-                mesh.campos.stress.bruto(i,5) = max([s1 s2 s3]); %sigma_1
-                mesh.campos.stress.bruto(i,6) = min([s1 s2 s3]); %sigma_3
-                mesh.campos.stress.bruto(i,7) = sqrt(((s1-s2)^2+(s2-s3)^2+(s3-s1)^2)/2);%von Mises
+            if isfield(mesh.campos,"stress")
+                return;
             end
+            coord = mesh.nodos.coordenadas;
+            elem = mesh.elems;
+            dofs = mesh.nodos.dofs;
+            Uel = mesh.U;
+            C = mesh.material.C;
+            Czz = mesh.material.Czz;
+            f_stress = @stress_Q8;
+            f_global = @global_Q8;
+            f_interpolacion = @elem_a_nodos_Q8;
+            [bruto, n_bruto, n_suave] = stress_2D(coord, elem, dofs, Uel, C, Czz, f_stress, f_global, f_interpolacion);
+
+            mesh.campos.stress.bruto = bruto;
+            mesh.campos.stress.bruto_nodal = n_bruto;
+            mesh.campos.stress.suavizado_nodal = n_suave;
         end
         
         function mesh = calc_frecuencias(mesh)

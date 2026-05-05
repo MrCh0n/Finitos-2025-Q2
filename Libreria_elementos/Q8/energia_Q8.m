@@ -34,9 +34,9 @@ A = [ones(cant_puntos,1) x1 y1 x1.^2 x1.*y1 y1.^2 x1.^2.*y1 y1.^2.*x1];
 A = inv(A);
 
 %% Gauss e*C*e
-exx = epsilon(1:3:end)';
-eyy = epsilon(2:3:end)';
-exy = epsilon(3:3:end)';
+exx = epsilon(:,1);
+eyy = epsilon(:,2);
+exy = epsilon(:,3);
 
 U = 0;
 

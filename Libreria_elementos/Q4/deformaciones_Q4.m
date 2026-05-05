@@ -51,8 +51,7 @@ for i = 1:n
     
     mult = abs(det(J))*w(i);
 
-    e(i,:) = Bel*Uel*mult;%epsilon del punto de gauss
-    xy = e([1 2 3])';
-    epsilon = epsilon + xy;%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
+    e = Bel*Uel*mult;%epsilon del punto de gauss
+    epsilon = epsilon + e;%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
 end% i 
 end

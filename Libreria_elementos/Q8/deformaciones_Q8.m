@@ -1,5 +1,5 @@
 function [epsilon] = deformaciones_Q8(nodos,Uel)
-%Devuelve un vector [exx1, eyy1, exy1, exx2..., exy8] de deformaciones de
+%Devuelve un vector [exx, eyy, exy] de deformaciones de
 %un Q8
 %
 %epsilon = deformaciones_Q8(nodos, Uel)
@@ -37,7 +37,7 @@ Bel = zeros(3,2*cant_puntos);
  
 dir1 = 1:2:2*cant_puntos;
 dir2 = 2:2:2*cant_puntos;
-epsilon = zeros(3*cant_puntos,1);
+epsilon = zeros(3,1);
 
 for i = 1:n
     xi = puntos(i,1);
@@ -65,6 +65,6 @@ for i = 1:n
     
     e(i,:) = Bel*Uel*mult;%epsilon del punto de gauss
     xy = e([1 2 3])';
-    epsilon = epsilon + [xy; xy; xy; xy; xy; xy; xy; xy];%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
+    epsilon = epsilon + xy;%TODO deberia extrapolar a las esquinas pero es en (0,0) por ahora
 end% i 
 end

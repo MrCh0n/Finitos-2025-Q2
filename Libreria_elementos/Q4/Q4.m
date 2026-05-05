@@ -86,44 +86,27 @@ classdef Q4 < handle
         end
 
         function mesh = calc_errorzz(mesh)
-            deformaciones = zeros(mesh.counts.nelem,3);
-            mesh.campos.deformaciones.nodal_bruto = zeros(mesh.counts.nnod, 3);
-            count = zeros(mesh.counts.nnod,1);
-
-            for i = 1:mesh.counts.nelem
-                nodosid = mesh.elems(i,:);
-
-                coord = mesh.nodos.coordenadas(nodosid,:);
-
-                dir = reshape(mesh.nodos.dofs(nodosid,:)',1,[]);
-
-                Uel = mesh.U(dir);
-
-                epsilon_el = deformaciones_Q4(coord, Uel);
-
-                deformaciones(i,:) = epsilon_el';
-
-                stress_el = stress_elem_a_nodo(coord, epsilon_el');
-
-                mesh.campos.deformaciones.nodal_bruto(nodosid,:) = mesh.campos.deformaciones.nodal_bruto(nodosid,:) + stress_el;
-                count(nodosid,:) = count(nodosid,:) + 1;
+            if ~isfield(mesh.campos,"stress")
+                mesh.calc_stress;
             end
-
-            if ~isfield(mesh.campos,"Global_matrix")
-                mesh.campos.Global_matrix = armar_Global(mesh);
-            end
-
-            mesh.campos.deformaciones.bruto = deformaciones;
-            mesh.campos.deformaciones.nodal_suavizado = mesh.campos.Global_matrix\mesh.campos.deformaciones.nodal_bruto;
-            mesh.campos.deformaciones.nodal_bruto = mesh.campos.deformaciones.nodal_bruto./count;
-            
             coord = mesh.nodos.coordenadas;
             elem = mesh.elems;
-            bruto = mesh.campos.deformaciones.nodal_bruto;
-            suavizado = mesh.campos.deformaciones.nodal_suavizado;
             C = mesh.material.C;
+            C_inv = inv(mesh.material.C);
 
-            [zz, U, E] = error_zz_2D(coord, elem, bruto, suavizado, C, @energia_Q4);
+            stress_bruto = mesh.campos.stress.bruto(:,1:3)';
+            stress_n_bruto = mesh.campos.stress.bruto_nodal(:,1:3)';
+            stress_n_suave = mesh.campos.stress.suavizado_nodal(:,1:3)';
+
+            bruto = (C_inv*stress_bruto)';%calculo la deformacion a partir de la tensiones
+            n_bruto = (C_inv*stress_n_bruto)';
+            n_suave = (C_inv*stress_n_suave)';
+
+            mesh.campos.deformaciones.bruto = bruto;
+            mesh.campos.deformaciones.nodal_bruto = n_bruto;
+            mesh.campos.deformaciones.nodal_suavizado = n_suave;
+
+            [zz, U, E] = error_zz_2D(coord, elem, n_bruto, n_suave, C, @energia_Q4);
 
             mesh.error.E = E;
             mesh.error.U = U;
@@ -139,7 +122,10 @@ classdef Q4 < handle
         end
 
         function mesh = calc_stress(mesh)
-            %TODO poner que use el global devuelta
+            if isfield(mesh.campos,"stress")
+                return;
+            end
+            fprintf("hola");
             coord = mesh.nodos.coordenadas;
             elem = mesh.elems;
             dofs = mesh.nodos.dofs;
