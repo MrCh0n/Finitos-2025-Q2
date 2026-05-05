@@ -17,8 +17,8 @@ bordes = [0 0;
           L W;
           0 W];
 
-divx = 2;
-divy = 2;
+divx = 10;
+divy = 6;
 
 %% Mallador
 elemtype = upper('Q4');
@@ -81,3 +81,6 @@ mesh.calc_U;
 mesh.calc_stress;
 
 %mesh.dibujar_stress;
+%% Error Posteriori
+mesh.calc_errorzz;
+mesh.error
