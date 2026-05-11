@@ -8,8 +8,6 @@ E = 1;
 t = 1;
 v = 0.3;
 rho = 1;
-%Plain stress
-C = t*E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
 
 W = 1;
 L = 10;
@@ -26,7 +24,7 @@ divy = 3;
 cant_puntos = 4;
 
 % creo el mesh y calculo la K
-meshQ4 = Q4(bordes,divx,divy,C);
+meshQ4 = Q4(bordes,divx,divy,E,v,t,"stress");
 
 % hacer la carga
 carga = zeros(4,4);
@@ -40,7 +38,7 @@ end
 meshQ4.armar_K;
 
 %masa
-meshQ4.armar_M(rho*t);
+meshQ4.armar_M(rho,1);
 
 % Condiciones de borde
 borde_inferior = meshQ4.bordes.lado_12;
@@ -59,7 +57,7 @@ meshQ4.dibujar_frecuencias;
 cant_puntos = 8;
 
 % creo el mesh y calculo la K
-meshQ8 = Q8(bordes,divx,divy,C);
+meshQ8 = Q8(bordes,divx,divy,E,v,t,"stress");
 
 % hacer la carga
 carga = zeros(4,6);
@@ -73,7 +71,7 @@ end
 meshQ8.armar_K;
 
 %masa
-meshQ8.armar_M(rho*t);
+meshQ8.armar_M(rho, 1);
 
 % Condiciones de borde
 borde_inferior = meshQ8.bordes.lado_12;

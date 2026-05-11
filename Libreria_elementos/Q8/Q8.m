@@ -31,10 +31,10 @@ classdef Q8 < handle
             mesh.material.t = t;
 
             if upper(tipo) == "STRESS"
-                mesh.material.C = t*E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
+                mesh.material.C = E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
                 mesh.material.Czz = zeros(1,3);
             else
-                mesh.material.C = t*E/((1+v)*(1-2*v))*[1-v v 0;v 1-v 0;0 0 (1-2*v)/2];
+                mesh.material.C = E/((1+v)*(1-2*v))*[1-v v 0;v 1-v 0;0 0 (1-2*v)/2];
                 mesh.material.Czz = E*v/(1+v)/(1-2*v)*[1,1,0];
             end
 
@@ -49,8 +49,9 @@ classdef Q8 < handle
             dofs = mesh.nodos.dofs;
             C = mesh.material.C;
             funcion = @crearK_Q8;
+            t = mesh.material.t;
 
-            mesh.K = armar_K_2D(coord, elem, dofs, dofselem, C, funcion);
+            mesh.K = armar_K_2D(coord, elem, dofs, dofselem, t*C, funcion);
         end
 
         function mesh = armar_R(mesh, i, carga_s, carga_v, type)
@@ -80,8 +81,9 @@ classdef Q8 < handle
             elem = mesh.elems;
             dofs = mesh.nodos.dofs;
             funcion = @masa_Q8;
+            t = mesh.material.t;
 
-            mesh.M = armar_M_2D(coord, elem, dofs, dofselem, p, tipo, funcion);
+            mesh.M = armar_M_2D(coord, elem, dofs, dofselem, t*p, tipo, funcion);
         end
 
         function mesh = calc_errorzz(mesh)
