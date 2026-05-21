@@ -6,7 +6,7 @@ addpath(genpath(pwd+"/Q4"))
 addpath(genpath(pwd+"/General_2D"))
 %% Datos
 %Cant de elementos por eje
-divx = 3;
+divx = 4;
 divy = 3;
 
 %Geometria
@@ -25,16 +25,15 @@ lambda = 40e6;%[Mpa] parametro Lame
 mu = 40e6;%[Mpa] parametro Lame
 
 %Poros
-alpha = 1;% coeficiente de Biot
+alpha = 0.4;% coeficiente de Biot
 M = 130/6e6;%[Mpa] modulo de Biot
-Pp = 0.5e6;%[Mpa] presion uniforme inicial
+Pp = 0;%[Mpa] presion uniforme inicial
 phi = 0.375;% Porosidad
 k = 1.01937e-9;%[m^2] Permeabilidad
 mu_f = 1;%[Pa s] Viscosidad del fluido
 
 %Carga
 q = 10000;%[N/m] Carga distribuida
-q=0;
 %Strain
 C = [lambda+2*mu lambda 0;lambda lambda+2*mu 0;0 0 mu];
 Czz = lambda*[1,1,0];
@@ -64,6 +63,9 @@ V = zeros(nnz,1);
 cont = 1;
 
 Cg = zeros(ndof, nnod);
+F = zeros(nnod, ndof);
+Mm = zeros(nnod, nnod);
+Kp = zeros(nnod, nnod);
 for i = 1:nelem
     nodoid = elems(i,:);
 
@@ -73,9 +75,19 @@ for i = 1:nelem
 
     Cg_el = crearCg_Q4(coord, t, alpha);
 
+    F_el = crearF_Q4(coord, t, alpha, dt);
+
+    M_el = crearM_Q4(coord, M);
+
+    Kp_el = crearK_Q4_poros(coord, k, mu_f, t);
+
     dir = reshape(dofs(nodoid,:)',1,[]);
 
     Cg(dir,nodoid) = Cg(dir,nodoid) + Cg_el;
+    F(nodoid,dir) = F(nodoid,dir) + F_el;
+    Mm(nodoid, nodoid) = Mm(nodoid, nodoid) + M_el;
+    Kp(nodoid, nodoid) = Kp(nodoid, nodoid) + Kp_el;
+
     for a = 1:dofselem
         for b = 1:dofselem
             I(cont) = dir(a);
@@ -89,13 +101,14 @@ end
 K = sparse(I,J,V);
 Kr = K(free,free);
 inv_Kr = inv(Kr);
-%% R estatico
-P = ones(nnod,1)*Pp;
 
+%presion
+M = M/dt;
+inv_P = inv(M+Kp);
+%% R estatico
 R = zeros(ndof,1);
 
-F = q*L;%fuerza total de la distribuida
-Q = F/divx;% la fuerza en los nodos
+Q = q*L/divx;% la fuerza en los nodos
 arriba = bordes.lado_34;
 arr_y = dofs(arriba,2);
 
@@ -103,18 +116,27 @@ R(arr_y) = R(arr_y) - Q;
 R(arr_y([1 end])) = R(arr_y([1 end]))/2;%los bordes tienen la mitad de fuerza
 R_est = R;
 
-%% TODO for loop de U-P-U-P
+%% for loop de U-P-U-P
+U = zeros(ndof,1);
+P = ones(nnod,1)*Pp;
+for i = 1:1
 %% Calculo U
 R = R_est - Cg*P;
-U = zeros(ndof,1);
 
 Kr = K(free,free);
 Rr = R(free);
 
+U_t = U;
 U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
 
+difU = norm(U-U_t);
+
 %% Caluclo P
-%% Fin forloop
+P_t = P;
+P = inv_P*(M*P_t + F*(U-U_t));
+
+difP = norm(P-P_t);
+end
 
 %% Stress
 Pel = zeros(nelem,1);
@@ -144,3 +166,6 @@ draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
 hold off
 
 %draw_stress(nodos,elems,bruto)
+
+
+%% funciones

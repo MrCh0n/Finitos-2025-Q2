@@ -18,7 +18,7 @@ function [bruto, bruto_nodal, suavizado_nodal] = stress_2D_poroelasticidad(nodos
         Uel = U(dir);
         Pel = P(i);
         
-        sigmas = stress(Coord, Uel, Pel, alpha, C, Czz)
+        sigmas = stress(Coord, Uel, Pel, alpha, C, Czz);
     
         s1 = sigmas(4);
         s2 = sigmas(5);
