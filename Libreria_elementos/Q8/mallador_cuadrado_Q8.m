@@ -1,10 +1,20 @@
-function [nodos, elems] = mallador_cuadrado_Q8(bordes,divX,divY)
+function [nodos, elems, borde] = mallador_cuadrado_Q8(bordes,divX,divY)
 %mallador de elementos Q8 para un cuadrilatero
 %
+% Entradas
 %bordes es una matrix de (4,2) de los nodos limitantes al cuadrilatero
 %
 %divx es la cantidad de elementos en la direccion x
 %divy es la cantidad de elementos en la direccion y
+%
+% Salidas
+% nodos es una lista de las coordenadas de los nodos
+% elems es una lista de indices a los nodos de los elementos [ (divX)*(divy), 8 ]
+% bordes es un struct con los nodos de los 4 lados para hacer las condiciones de borde
+%  - bordes.lados_12
+%  - bordes.lados_23
+%  - bordes.lados_34
+%  - bordes.lados_41
 %
 %poner los nodos en bordes como:
 % 4 - - - 3
@@ -63,4 +73,10 @@ function [nodos, elems] = mallador_cuadrado_Q8(bordes,divX,divY)
             elems(offset_elems+j1,5:8) = [offset+j1+padding_i offset+j+padding_c+1 offset+j1+padding_i+1 offset+j+1];%los intermedios
         end
     end
+
+    
+    borde.lado_12 = sort([1:padding_c:nnod, 1+padding_i:padding_c:nnod]);
+    borde.lado_23 = nnod-padding_i+1:nnod;
+    borde.lado_34 = sort([padding_i:padding_c:nnod, padding_c:padding_c:nnod]);
+    borde.lado_41 = 1:padding_i;
 end

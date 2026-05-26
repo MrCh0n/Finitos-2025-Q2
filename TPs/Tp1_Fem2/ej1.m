@@ -1,4 +1,5 @@
 function [wB,Nx_p,My_p,Qy_p] = ej1(type,div)
+%hecho con clases para hacer mas facil el cambio entre Mindlin y Degenerado
 %type: tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
 %div: cuantas divisiones en cada  lado
@@ -55,7 +56,7 @@ esfuerzos = mesh.esfuerzo;
 dir = div:div:nelem; %son los ultimos elementos de cada fila
 Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
 My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
-Qy_p = esfuerzos(dir,6);
+Qy_p = esfuerzos(dir,6); 
 %% Graficar
 %mesh.dibujar;
 
