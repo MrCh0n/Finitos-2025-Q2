@@ -4,10 +4,11 @@ close all
 
 addpath(genpath(pwd+"/Q4"))
 addpath(genpath(pwd+"/General_2D"))
+
 %% Datos
 %Cant de elementos por eje
-divx = 4;
-divy = 3;
+divx = 20;
+divy = 20;
 
 %Geometria
 L = 1;%m
@@ -19,14 +20,21 @@ bordes = [0 0;
           L W;
           0 W];
 %Tiempo
+T = 600;%tiempo de simulacion
 dt = 1;%[s] delta de tiempo
+time = ceil(T/dt);%cuantos pasos da el for loop
+
 %Material
 lambda = 40e6;%[Mpa] parametro Lame
 mu = 40e6;%[Mpa] parametro Lame
+Kdr = lambda + 2/3*mu;%Drain bulk modulus
 
 %Poros
 alpha = 0.4;% coeficiente de Biot
-M = 130/6e6;%[Mpa] modulo de Biot
+
+M = 250/6e6;%[Mpa] modulo de Biot caso 1
+%M = 6.06e9;%[Mpa] modulo de Biot caso 2
+
 Pp = 0;%[Mpa] presion uniforme inicial
 phi = 0.375;% Porosidad
 k = 1.01937e-9;%[m^2] Permeabilidad
@@ -37,6 +45,7 @@ q = 10000;%[N/m] Carga distribuida
 %Strain
 C = [lambda+2*mu lambda 0;lambda lambda+2*mu 0;0 0 mu];
 Czz = lambda*[1,1,0];
+
 %% Mesh
 [nodos, elems, bordes] = mallador_cuadrado_Q4(bordes, divx, divy);
 
@@ -47,11 +56,16 @@ nelem = size(elems,1);
 dofs = reshape(1:ndof,2,[])';
 
 free = true(nnod, 2);
+freeP = true(nnod,1);
 %empotrado en U
 empotrado = [bordes.lado_41 bordes.lado_12 bordes.lado_23];
 free(empotrado,:) = false;
 
 free = reshape(free', 1, []);
+%P=0 arriba
+arriba = bordes.lado_34;
+freeP(arriba) = false;
+
 %% Matrices
 dofselem = 8;
 
@@ -99,12 +113,7 @@ for i = 1:nelem
 end
 
 K = sparse(I,J,V);
-Kr = K(free,free);
-inv_Kr = inv(Kr);
 
-%presion
-M = M/dt;
-inv_P = inv(M+Kp);
 %% R estatico
 R = zeros(ndof,1);
 
@@ -118,24 +127,62 @@ R_est = R;
 
 %% for loop de U-P-U-P
 U = zeros(ndof,1);
-P = ones(nnod,1)*Pp;
-for i = 1:1
-%% Calculo U
-R = R_est - Cg*P;
+P = zeros(nnod,1);
 
 Kr = K(free,free);
-Rr = R(free);
+inv_Kr = inv(Kr);
 
-U_t = U;
-U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
+%presion
+matriz_P = Mm/dt + Kp;
+inv_P = inv(matriz_P);
 
-difU = norm(U-U_t);
+%Condicion de no drenado
+for i = 1:2
+    %% Calculo U
+    R = R_est - Cg*P;
+   
+    Rr = R(free);
+    
+    U_prev = U;
+    U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
+    
+    difU = norm(U-U_prev);
+    
+    %% Calculo P
+    P_prev = P;
+    P = inv_P*(Mm*P_prev + F*(U-U_prev));
+    
+    difP = norm(P-P_prev);
+end
+error = M*F*dt*U-P;%-alpha*M*div(U)-P
+por = error./P;
+norm(error);
+norm(P);
 
-%% Caluclo P
-P_t = P;
-P = inv_P*(M*P_t + F*(U-U_t));
+%Condicion de drenado
+matriz_Pr = matriz_P(freeP,freeP);
+inv_Pr = inv(matriz_Pr);
 
-difP = norm(P-P_t);
+P(~freeP) = 0;
+for i = 1:time
+    %% Calculo U
+    R = R_est - Cg*P;
+    
+    Kr = K(free,free);
+    Rr = R(free);
+    
+    U_prev = U;
+    U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
+    
+    difU = norm(U-U_prev);
+    
+    %% Calculo P
+    P_prev = P;
+    Rp = Mm*P_prev + F*(U-U_prev);%"fuerza en P"
+    Rpr = Rp(freeP);%reducido
+    P(freeP) = inv_Pr*Rpr;
+    
+    difP = norm(P-P_prev);
 end
 
 %% Stress
@@ -167,5 +214,4 @@ hold off
 
 %draw_stress(nodos,elems,bruto)
 
-
-%% funciones
+reshape(P,divy+1,divx+1);
