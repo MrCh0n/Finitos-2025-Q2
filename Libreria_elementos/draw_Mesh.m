@@ -1,4 +1,4 @@
-function draw_Mesh(Elem,Nodos,options)
+pwfunction draw_Mesh(Elem,Nodos,options)
 % Sirve para dibujar el Mesh con las coordenadas en Nodos y Elementos. 
 % Para dibujar la deformada se puede reemplazar Nodos con Deformada 
 
