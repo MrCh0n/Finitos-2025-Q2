@@ -4,8 +4,8 @@ close all
 
 addpath(genpath(pwd+"/../Libreria_elementos"))
 %% Datos
-L = 1;%m
-W = 0.1;%m
+L = 100;%m
+W = 10;%m
 
 E = 10e9;%Gpa
 v = 0.3;
@@ -25,8 +25,13 @@ bordes = [0 0;
           L W;
           0 W];
 
+<<<<<<< HEAD
 divx = 5;
 divy = 1;
+=======
+divx = 40;
+divy = 10;
+>>>>>>> 99db975132e0b9d17db27399f808530fd3e09e5f
 %% Mesh
 [nodos, elems, bordes] = mallador_cuadrado_Q4(bordes, divx, divy);
 
@@ -99,8 +104,14 @@ U(free) = Kr\Rr;
 
 w = F/L;
 I = W^3*t/12;
+<<<<<<< HEAD
 delta = -w*L^4/(8*E*I);
 error = (min(U)-delta)/abs(delta)*100;
+=======
+delta = -w*L^4/(8*E*I)
+error = (min(U)-delta)/abs(delta)*100;
+numerico = min(U)
+>>>>>>> 99db975132e0b9d17db27399f808530fd3e09e5f
 
 %Stress
 [bruto, n_bruto, n_suave] = stress_2D(nodos, elems, dofs, U, C, Czz, @stress_Q4, @global_Q4, @elem_a_nodos_Q4);
