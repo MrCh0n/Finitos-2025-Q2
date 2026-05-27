@@ -7,8 +7,8 @@ addpath(genpath(pwd+"/General_2D"))
 
 %% Datos
 %Cant de elementos por eje
-divx = 20;
-divy = 20;
+divx = 5;
+divy = 5;
 
 %Geometria
 L = 1;%m
@@ -20,7 +20,7 @@ bordes = [0 0;
           L W;
           0 W];
 %Tiempo
-T = 600;%tiempo de simulacion
+T = 6000;%tiempo de simulacion
 dt = 1;%[s] delta de tiempo
 time = ceil(T/dt);%cuantos pasos da el for loop
 
@@ -32,7 +32,7 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 %Poros
 alpha = 0.4;% coeficiente de Biot
 
-M = 250/6e6;%[Mpa] modulo de Biot caso 1
+M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
 %M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 0;%[Mpa] presion uniforme inicial
@@ -58,8 +58,11 @@ dofs = reshape(1:ndof,2,[])';
 free = true(nnod, 2);
 freeP = true(nnod,1);
 %empotrado en U
-empotrado = [bordes.lado_41 bordes.lado_12 bordes.lado_23];
-free(empotrado,:) = false;
+en_x = [bordes.lado_41 bordes.lado_23];
+en_y = [bordes.lado_12]; 
+
+free(en_x,1) = false;
+free(en_y,2) = false;
 
 free = reshape(free', 1, []);
 %P=0 arriba
@@ -137,25 +140,12 @@ matriz_P = Mm/dt + Kp;
 inv_P = inv(matriz_P);
 
 %Condicion de no drenado
-for i = 1:2
-    %% Calculo U
-    R = R_est - Cg*P;
-   
-    Rr = R(free);
-    
-    U_prev = U;
-    U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
-    
-    difU = norm(U-U_prev);
-    
-    %% Calculo P
-    P_prev = P;
-    P = inv_P*(Mm*P_prev + F*(U-U_prev));
-    
-    difP = norm(P-P_prev);
-end
+free_P = true(nnod,1);
+[U,P] = iterar(U,P,K,Cg,F,Kp,Mm,dt,free,free_P,R_est,2);
+
+Pinicial=reshape(P,divy+1,divx+1);
 error = M*F*dt*U-P;%-alpha*M*div(U)-P
-por = error./P;
+por = abs(error./P);
 norm(error);
 norm(P);
 
@@ -164,27 +154,7 @@ matriz_Pr = matriz_P(freeP,freeP);
 inv_Pr = inv(matriz_Pr);
 
 P(~freeP) = 0;
-for i = 1:time
-    %% Calculo U
-    R = R_est - Cg*P;
-    
-    Kr = K(free,free);
-    Rr = R(free);
-    
-    U_prev = U;
-    U(free) = inv_Kr*Rr;%si haces un for loop ya esta hecho la inversion de matriz
-    
-    difU = norm(U-U_prev);
-    
-    %% Calculo P
-    P_prev = P;
-    Rp = Mm*P_prev + F*(U-U_prev);%"fuerza en P"
-    Rpr = Rp(freeP);%reducido
-    P(freeP) = inv_Pr*Rpr;
-    
-    difP = norm(P-P_prev);
-end
-
+[U,P,tiempo,presion] = iterar(U,P,K,Cg,F,Kp,Mm,dt,free,freeP,R_est,time);
 %% Stress
 Pel = zeros(nelem,1);
 for i = 1:nelem
@@ -197,6 +167,7 @@ end
 [bruto, n_bruto, n_suave] = stress_2D_poroelasticidad(nodos, elems, dofs, U, Pel, alpha, C, Czz, @stress_Q4_poros, @global_Q4, @elem_a_nodos_Q4);
 
 %% Plot
+plot(tiempo,presion,"Color",'b')
 escala = 200;
 
 x = nodos(:,1);
@@ -206,12 +177,13 @@ x_deformada = x + escala*U(1:2:ndof);
 y_deformada = y + escala*U(2:2:ndof);
 nodos_deformada = [x_deformada y_deformada];
 
-figure()
-draw_Mesh(elems, nodos,'Type','Q4','Color','b')
-hold on
-draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
-hold off
+% figure()
+% draw_Mesh(elems, nodos,'Type','Q4','Color','b')
+% hold on
+% draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
+% hold off
 
 %draw_stress(nodos,elems,bruto)
 
-reshape(P,divy+1,divx+1);
+%reshape(P,divy+1,divx+1);
+%reshape(U(2:2:end),divy+1,divx+1)
