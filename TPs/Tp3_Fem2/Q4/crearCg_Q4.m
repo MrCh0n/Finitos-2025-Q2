@@ -53,8 +53,8 @@ for i = 1:n
         %crear la matrz B
         B(1,dir1) = Bx;
         B(2,dir2) = By;
-        B(3,dir1) = By;
-        B(3,dir2) = Bx;
+        %B(3,dir1) = By;
+        %B(3,dir2) = Bx;
     
         mult = abs(det(J))*w(i)*t;
         Kmin = B'*alpha*m*N;

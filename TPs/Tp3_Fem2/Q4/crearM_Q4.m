@@ -1,4 +1,4 @@
-function [M] = crearM_Q4(nodos, m)
+function [M] = crearM_Q4(nodos, m, t)
 %Crea la matriz de transitorio de un Q4
 %
 %M = crearM_Q4(nodos)
@@ -32,7 +32,7 @@ for i = 1:n
 
         J = D*nodos;
   
-        mult = w(i);
+        mult = abs(det(J))*w(i)*t;
         Mmin = N'*N;
         
         M = M + Mmin*mult;
