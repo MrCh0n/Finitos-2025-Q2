@@ -20,10 +20,10 @@ bordes = [0 0;
           L W;
           0 W];
 %Tiempo
-T = 6000;%tiempo de simulacion
-%T = 600;
+%T = 6000;%tiempo de simulacion
+T = 600;
 dt = 0.1;%[s] delta de tiempo
-time = ceil(T/dt);%cuantos pasos da el for loop
+nt = ceil(T/dt);%cuantos pasos da el for loop
 
 %Material
 lambda = 40e6;%[Mpa] parametro Lame
@@ -33,8 +33,8 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 %Poros
 alpha = 0.4;% coeficiente de Biot
 
-M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
-%M = 6.06e9;%[Mpa] modulo de Biot caso 2
+%M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
+M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 22246;%[Pa] presion uniforme inicial
 phi = 0.375;% Porosidad
@@ -116,6 +116,9 @@ for i = 1:nelem
     end%a
 end
 
+% M_monio = alfa^2/Kdr * Mm (con M=1)
+M_monio = alpha^2/Kdr*Mm*M;
+
 K = sparse(I,J,V);
 
 %% R estatico
@@ -142,8 +145,8 @@ matriz_P = Mm/dt + Kp;
 inv_P = inv(matriz_P);
 
 %Condicion de no drenado
-free_P = true(nnod,1);
-[U,P] = iterar(U,P,K,Cg,F,Kp,Mm,dt,free,free_P,R_est,4);
+freeP_nodrenado = true(nnod,1);
+[U,P] = iterar(U,P,K,Cg,F,Kp,Mm,M_monio,dt,free,freeP_nodrenado,R_est,4);
 
 Pinicial=reshape(P,divy+1,divx+1);
 error = M*F*dt*U-P;%-alpha*M*div(U)-P
@@ -156,7 +159,7 @@ matriz_Pr = matriz_P(freeP,freeP);
 inv_Pr = inv(matriz_Pr);
 
 P(~freeP) = 0;
-[U,P,tiempo,presion] = iterar(U,P,K,Cg,F,Kp,Mm,dt,free,freeP,R_est,round(time/dt));
+[U,P,tiempo,presion] = iterar(U,P,K,Cg,F,Kp,Mm,M_monio,dt,free,freeP,R_est,nt);
 %% Stress
 Pel = zeros(nelem,1);
 for i = 1:nelem
