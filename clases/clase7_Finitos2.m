@@ -13,7 +13,8 @@ t = 0.1;
 alpha = 1;
 Pp = 0.5e6;%Mpa
 
-F = 0;%1e6*L*t;% Carga total [N]
+F = 1e6*L*t;% Carga total [N]
+F = 0;
 
 %Stress
 C = E/(1-v^2)*[1 v 0;v 1 0;0 0 (1-v)/2];
@@ -24,8 +25,13 @@ bordes = [0 0;
           L W;
           0 W];
 
+<<<<<<< HEAD
+divx = 5;
+divy = 1;
+=======
 divx = 40;
 divy = 10;
+>>>>>>> 99db975132e0b9d17db27399f808530fd3e09e5f
 %% Mesh
 [nodos, elems, bordes] = mallador_cuadrado_Q4(bordes, divx, divy);
 
@@ -98,14 +104,21 @@ U(free) = Kr\Rr;
 
 w = F/L;
 I = W^3*t/12;
+<<<<<<< HEAD
+delta = -w*L^4/(8*E*I);
+error = (min(U)-delta)/abs(delta)*100;
+=======
 delta = -w*L^4/(8*E*I)
 error = (min(U)-delta)/abs(delta)*100;
 numerico = min(U)
+>>>>>>> 99db975132e0b9d17db27399f808530fd3e09e5f
 
 %Stress
 [bruto, n_bruto, n_suave] = stress_2D(nodos, elems, dofs, U, C, Czz, @stress_Q4, @global_Q4, @elem_a_nodos_Q4);
+bruto(:,1:2) = bruto(:,1:2) + alpha*Pp;
+stress = bruto(:,1:3);
 %% Plot
-escala = 1;
+escala = 1000;
 
 x = nodos(:,1);
 y = nodos(:,2);
