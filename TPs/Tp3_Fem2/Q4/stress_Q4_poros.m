@@ -60,10 +60,10 @@ function [Stress] = stress_Q4_poros(Coord, Uel, Pel, alpha, C, Czz)
     Bel(3,dir2) = Bx;
     %alpha =0
     Stress(1:3) = C*Bel*Uel; %sxx syy sxy
-    Stress(6) = Czz*Bel*Uel + alpha*Pel; %szz
+    Stress(6) = Czz*Bel*Uel; %szz
 
-    sxx = Stress(1)+ alpha*Pel;
-    syy = Stress(2)+ alpha*Pel;
+    sxx = Stress(1) - alpha*Pel;
+    syy = Stress(2) - alpha*Pel;
     sxy = Stress(3);
 
     sigma_plano = [sxx sxy;
