@@ -1,5 +1,5 @@
 function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M, M_monio, dt, freeU, freeP, R_est, nt)
-    flag_relax = false;
+    flag_relax = true;
     omega = 0.8;
 
     Kr = K(freeU,freeU);
@@ -14,11 +14,11 @@ function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M,
     matriz_Pr = matriz_P(freeP,freeP);
     inv_Pr = inv(matriz_Pr);
     
-    e = 1e-3;% 0.1%
+    e = 1e-4;% 0.1%
 
     t = 0;
-    nnod = size(P,1)
-    ndof = size(U,1)
+    nnod = size(P,1);
+    ndof = size(U,1);
     presion = zeros(nnod,nt);
     desplazamineto = zeros(ndof,nt);
     tiempo = zeros(1,nt);

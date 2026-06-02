@@ -20,9 +20,9 @@ bordes = [0 0;
           W H;
           0 H];
 %Tiempo
-%T = 6000;%tiempo de simulacion
-T = 600;
-dt = 0.1;%[s] delta de tiempo
+T = 6000;%tiempo de simulacion
+%T = 600;
+dt = 1;%[s] delta de tiempo
 nt = ceil(T/dt);%cuantos pasos da el for loop
 
 %Material
@@ -34,7 +34,7 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 alpha = 0.4;% coeficiente de Biot
 
 M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
-M = 6.06e9;%[Mpa] modulo de Biot caso 2
+%M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 0;%22246;%[Pa] presion uniforme inicial
 phi = 0.375;% Porosidad
@@ -153,20 +153,20 @@ for j = 1:divy+1
 analitico_P = zeros(1,nt);
 analitico_U = zeros(1,nt);
 
-z=W*(j-1)/divy;
+z=H*(j-1)/divy;
 
 for i = 1:nt
     tmp = 0;
     tmp2 = 0;
     t = tiempo(i);
-    cte = pi^2*t*cv/W^2/4;
+    cte = pi^2*t*cv/H^2/4;
     for k = 1:1000
         exponencial = exp(-(2*k-1)^2*cte);
-        tmp = tmp + (-1)^(k-1)/(2*k-1)*cos(pi/2*z/W*(2*k-1))*exponencial;
-        tmp2 = tmp2 + (-1)^(k-1)/(2*k-1)^2*sin(pi/2*z/W*(2*k-1))*exponencial;
+        tmp = tmp + (-1)^(k-1)/(2*k-1)*cos(pi/2*z/H*(2*k-1))*exponencial;
+        tmp2 = tmp2 + (-1)^(k-1)/(2*k-1)^2*sin(pi/2*z/H*(2*k-1))*exponencial;
     end
     analitico_P(i) = 4/pi*P0*tmp;
-    analitico_U(i) = q*z/Eedo-alpha*P0*W/Eedo*8/pi^2*tmp2;
+    analitico_U(i) = q*z/Eedo-alpha*P0*H/Eedo*8/pi^2*tmp2;
 end
 P_altura(j,:) = presion(j,tiempos);
 a_P(j,:) = analitico_P(tiempos);
@@ -174,7 +174,7 @@ a_P(j,:) = analitico_P(tiempos);
 U_altura(j,:) = desplazamiento(dofs(j,2),tiempos);
 a_U(j,:) = -analitico_U(tiempos);
 end
-alturas = linspace(0,W,divy+1);
+alturas = linspace(0,H,divy+1);
 figure()
 hold on
 for i = 1:size(tiempos,2)
