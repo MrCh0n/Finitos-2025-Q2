@@ -20,9 +20,9 @@ bordes = [0 0;
           W H;
           0 H];
 %Tiempo
-%T = 6000;%tiempo de simulacion
-T = 600;
-dt = 0.1;%[s] delta de tiempo
+T = 6000;%tiempo de simulacion
+%T = 600;
+dt = 1;%[s] delta de tiempo
 nt = ceil(T/dt);%cuantos pasos da el for loop
 
 %Material
@@ -34,7 +34,7 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 alpha = 0.4;% coeficiente de Biot
 
 M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
-M = 6.06e9;%[Mpa] modulo de Biot caso 2
+%M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 0;%22246;%[Pa] presion uniforme inicial
 phi = 0.375;% Porosidad
