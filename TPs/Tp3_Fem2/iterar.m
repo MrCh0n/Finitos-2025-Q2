@@ -1,5 +1,5 @@
 function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M, M_monio, dt, freeU, freeP, R_est, nt)
-    flag_relax = false;
+    flag_relax = true;
     omega = 0.8;
 
     Kr = K(freeU,freeU);
