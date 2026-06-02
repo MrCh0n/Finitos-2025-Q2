@@ -1,6 +1,6 @@
 clc
 clear
-close all
+%close all
 
 addpath(genpath(pwd+"/Q4"))
 addpath(genpath(pwd+"/General_2D"))
@@ -105,18 +105,22 @@ freeP_nodrenado = true(nnod,1);
 
 Pinicial=reshape(P,divy+1,divx+1);
 P0=mean(mean(Pinicial));
-%
-Uy = U(2:2:end);
-Uy_m = Uy(12:1:22);
-yyaxis left
-plot(0:1:10,1000*Uy_m,'k*-');
-xlabel('Altura [m]')
-ylabel('Desplazamiento en Y [mm]')
-yyaxis right
-plot(0:1:10, P(12:1:22), 'bo-');
-ylabel('Presión [Pa]')
-%set(gca, 'XDir', 'reverse')
-% se podria agregar caso 2
+
+% % Graficos
+% Uy = U(2:2:end);
+% Uy_m = Uy(12:1:22);
+% yyaxis left
+% plot(0:1:10,1000*Uy_m,'k*-');
+% xlabel('Altura [m]')
+% ylabel('Desplazamiento en Y [mm]')
+% yyaxis right
+% plot(0:1:10, P(12:1:22)/1e3, 'ko--');
+% ylabel('Presión [kPa]')
+% ax = gca;
+% ax.YAxis(1).Color = 'k';
+% ax.YAxis(2).Color = 'k';
+% %set(gca, 'XDir', 'reverse')
+% % se podria agregar caso 2
 
 %Condicion de drenado
 matriz_Pr = matriz_P(freeP,freeP);
