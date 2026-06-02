@@ -1,5 +1,5 @@
-function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M, M_monio, dt, freeU, freeP, R_est, nt)
-    flag_relax = false;
+function [U, P, tiempo, presion] = iterar2(U, P, K, Cg, F, Kp, M,M_monio, dt, freeU, freeP, R_est, nt,flag_relax)
+    %flag_relax = false;
     omega = 0.8;
 
     Kr = K(freeU,freeU);
@@ -14,19 +14,17 @@ function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M,
     matriz_Pr = matriz_P(freeP,freeP);
     inv_Pr = inv(matriz_Pr);
     
-    e = 1e-3;% 0.1%
+    e = 1e-3;% 5%
 
     t = 0;
-    nnod = size(P,1)
-    ndof = size(U,1)
-    presion = zeros(nnod,nt);
-    desplazamineto = zeros(ndof,nt);
+    presion = zeros(1,nt);
     tiempo = zeros(1,nt);
 
+    tiempo = zeros(1,300);
+
     for i = 1:nt
-        presion(:,i) = P;
-        desplazamineto(:,i) = U;
-        tiempo(i) = t;
+        %presion(i) = mean(P);
+        %tiempo(i) = t;
         fprintf("\n ---- Tiempo %.2f s ----\n",t);
         t = t+dt;
 
@@ -35,6 +33,11 @@ function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M,
         P_old = P;
         n=0;
         while difP > e% Porciento de error
+            if norm(P)>1e20
+                break
+            end
+            tiempo(n+1) = n+1;
+            presion(n+1) = norm(P);
             %% Calculo U
             R = R_est + Cg*P;
     
@@ -65,10 +68,13 @@ function [U, P, tiempo, desplazamineto, presion] = iterar(U, P, K, Cg, F, Kp, M,
             difP = abs(norm(P-P_iter)/norm(P));
             fprintf("%d %e\n",n, difP);
             n = n+1;
-            if n > 300
+            if n > 400
                 break
             end
+            
         end
-
+        if norm(P)>1e20
+             break
+        end
     end
 end
