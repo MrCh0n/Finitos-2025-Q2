@@ -7,18 +7,18 @@ addpath(genpath(pwd+"/General_2D"))
 
 %% Datos
 %Cant de elementos por eje
-divx = 4;
-divy = 30;
+divx = 1;
+divy = 10;
 
 %Geometria
-L = 1;%m
-W = 10;%m
+W = 1;%m
+H = 10;%m
 t = 1;%m
 
 bordes = [0 0;
-          L 0;
-          L W;
-          0 W];
+          W 0;
+          W H;
+          0 H];
 %Tiempo
 %T = 6000;%tiempo de simulacion
 T = 6000;
@@ -79,7 +79,7 @@ M_monio = alpha^2/Kdr*Mm*M;
 %% R estatico
 R = zeros(ndof,1);
 
-Q = q*L/divx;% la fuerza en los nodos
+Q = q*W/divx;% la fuerza en los nodos
 arriba = bordes.lado_34;
 arr_y = dofs(arriba,2);
 
@@ -105,6 +105,18 @@ freeP_nodrenado = true(nnod,1);
 
 Pinicial=reshape(P,divy+1,divx+1);
 P0=mean(mean(Pinicial));
+%
+Uy = U(2:2:end);
+Uy_m = Uy(12:1:22);
+yyaxis left
+plot(0:1:10,1000*Uy_m,'k*-');
+xlabel('Altura [m]')
+ylabel('Desplazamiento en Y [mm]')
+yyaxis right
+plot(0:1:10, P(12:1:22), 'bo-');
+ylabel('Presión [Pa]')
+%set(gca, 'XDir', 'reverse')
+% se podria agregar caso 2
 
 %Condicion de drenado
 matriz_Pr = matriz_P(freeP,freeP);
