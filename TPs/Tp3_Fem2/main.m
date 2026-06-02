@@ -8,7 +8,7 @@ addpath(genpath(pwd+"/General_2D"))
 %% Datos
 %Cant de elementos por eje
 divx = 4;
-divy = 30;
+divy = 20;
 
 %Geometria
 L = 1;%m
@@ -21,8 +21,8 @@ bordes = [0 0;
           0 W];
 %Tiempo
 %T = 6000;%tiempo de simulacion
-T = 6000;
-dt = 1;%[s] delta de tiempo
+T = 600;
+dt = 0.1;%[s] delta de tiempo
 nt = ceil(T/dt);%cuantos pasos da el for loop
 
 %Material
@@ -34,7 +34,7 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 alpha = 0.4;% coeficiente de Biot
 
 M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
-%M = 6.06e9;%[Mpa] modulo de Biot caso 2
+M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 0;%22246;%[Pa] presion uniforme inicial
 phi = 0.375;% Porosidad
@@ -111,7 +111,7 @@ matriz_Pr = matriz_P(freeP,freeP);
 inv_Pr = inv(matriz_Pr);
 
 P(~freeP) = 0;
-[U,P,tiempo,presion] = iterar(U,P,K,Cg,F,Kp,Mm,M_monio,dt,free,freeP,R_est,nt);
+[U,P,tiempo,desplazamiento, presion] = iterar(U,P,K,Cg,F,Kp,Mm,M_monio,dt,free,freeP,R_est,nt);
 %% Stress
 Pel = zeros(nelem,1);
 for i = 1:nelem
@@ -123,12 +123,6 @@ for i = 1:nelem
 end
 [bruto, n_bruto, n_suave] = stress_2D_poroelasticidad(nodos, elems, dofs, U, Pel, alpha, C, Czz, @stress_Q4_poros, @global_Q4, @elem_a_nodos_Q4);
 %% Plot
-figure()
-plot(tiempo,presion,"Color",'b')
-hold on
-
-analitico = zeros(1,nt);
-
 Kd = lambda+2/3*mu;
 v = lambda/2/(lambda+mu);
 E0 = 2*mu*(1-v)/(1-2*v);
@@ -137,21 +131,58 @@ S = 1/M+alpha^2/Eedo;
 
 cv=k/mu_f/S;
 
-z=0;
+tiempos = ceil([1/6,0.5,1]*nt);
+
+for j = 1:divy+1
+analitico_P = zeros(1,nt);
+analitico_U = zeros(1,nt);
+
+z=W*(j-1)/divy;
 
 for i = 1:nt
     tmp = 0;
+    tmp2 = 0;
     t = tiempo(i);
     cte = pi^2*t*cv/W^2/4;
     for k = 1:1000
-        tmp = tmp + (-1)^(k-1)/(2*k-1)*cos(pi/2*z/W*(2*k-1))*exp(-(2*k-1)^2*cte);
+        exponencial = exp(-(2*k-1)^2*cte);
+        tmp = tmp + (-1)^(k-1)/(2*k-1)*cos(pi/2*z/W*(2*k-1))*exponencial;
+        tmp2 = tmp2 + (-1)^(k-1)/(2*k-1)^2*sin(pi/2*z/W*(2*k-1))*exponencial;
     end
-    analitico(i) = 4/pi*P0*tmp;
+    analitico_P(i) = 4/pi*P0*tmp;
+    analitico_U(i) = q*z/Eedo-alpha*P0*W/Eedo*8/pi^2*tmp2;
 end
-plot(tiempo,analitico,"Color",'k')
+P_altura(j,:) = presion(j,tiempos);
+a_P(j,:) = analitico_P(tiempos);
 
-xlabel('Tiempo [s]')
+U_altura(j,:) = desplazamiento(dofs(j,2),tiempos);
+a_U(j,:) = -analitico_U(tiempos);
+end
+alturas = linspace(0,W,divy+1);
+figure()
+hold on
+for i = 1:size(tiempos,2)
+    plot(alturas,P_altura(:,i),'b-*')
+    hold on
+    plot(alturas,a_P(:,i),'k-*')
+end
+xlabel('Altura [m]')
 ylabel('Presión de poros [Pa]')
+title('Consolidación unidimensional: comparación numérica vs analítica')
+
+legend('Numérico (FEM)', 'Analítico (Terzaghi)', 'Location', 'best')
+grid on
+hold off
+
+figure()
+hold on
+for i = 1:size(tiempos,2)
+    plot(alturas,U_altura(:,i),'b-*')
+    hold on
+    plot(alturas,a_U(:,i),'k-*')
+end
+xlabel('Altura [m]')
+ylabel('Desplazamiento [m]')
 title('Consolidación unidimensional: comparación numérica vs analítica')
 
 legend('Numérico (FEM)', 'Analítico (Terzaghi)', 'Location', 'best')
