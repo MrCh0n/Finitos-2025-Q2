@@ -20,9 +20,9 @@ bordes = [0 0;
           W H;
           0 H];
 %Tiempo
-T = 6000;%tiempo de simulacion
-%T = 600;
-dt = 1;%[s] delta de tiempo
+%T = 6000;%tiempo de simulacion
+T = 600;
+dt = 0.1;%[s] delta de tiempo
 nt = ceil(T/dt);%cuantos pasos da el for loop
 
 %Material
@@ -33,8 +33,8 @@ Kdr = lambda + 2/3*mu;%Drain bulk modulus
 %Poros
 alpha = 0.4;% coeficiente de Biot
 
-M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
-%M = 6.06e9;%[Mpa] modulo de Biot caso 2
+%M = 250/6*1e6;%[Mpa] modulo de Biot caso 1
+M = 6.06e9;%[Mpa] modulo de Biot caso 2
 
 Pp = 0;%22246;%[Pa] presion uniforme inicial
 phi = 0.375;% Porosidad
@@ -212,6 +212,21 @@ y = nodos(:,2);
 x_deformada = x + escala*U(1:2:ndof);
 y_deformada = y + escala*U(2:2:ndof);
 nodos_deformada = [x_deformada y_deformada];
+
+
+%% Error L2
+
+t_actual = tiempo(tiempos(1)); % tiempo a evaluar
+P_actual = presion(:, tiempos(1)); % Seleccionar la presión numérica correspondiente
+
+% Crear una función anónima congelando los parámetros físicos y el tiempo
+func_ana = @(y) presion_terzaghi(y, t_actual, P0, H, cv);
+
+% Calcular la norma L2
+[error_L2_abs, error_L2_rel] = error_L2(nodos, elems, P_actual, func_ana);
+
+fprintf('El error L2 en t = %.2f s es: %e\n', t_actual, error_L2_rel);
+
 
 % figure()
 % draw_Mesh(elems, nodos,'Type','Q4','Color','b')
