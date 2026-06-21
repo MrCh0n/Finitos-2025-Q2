@@ -21,6 +21,14 @@ for inod = 1:nnod
                 x1=4; x2=3; y1=2; y2=3;
             case 4
                 x1=4; x2=3; y1=1; y2=4;
+            case 5
+                x1=5; x2=2; y1=5; y2=7;
+            case 6
+                x1=8; x2=6; y1=6; y2=3;
+            case 7
+                x1=7; x2=3; y1=5; y2=7;
+            case 8
+                x1=8; x2=6; y1=8; y2=4;
         end
 
         %consigo vector perpendicular al elemento iele

@@ -18,7 +18,7 @@ q = -90; %psi
 %% Control
 type = 2; %tipo de elemento: 1 --> "Mindlin" o 2 --> "Degenerado"
 
-div = 16; %cuantas divisiones en cada  lado
+div = 8; %cuantas divisiones en cada  lado
 
 switch type
     case 1 %Mindlin
@@ -63,8 +63,8 @@ for i=1:nelem
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
     v3_el = v3(:,nodoid);
     
-    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
     %Kel = crearK(nodos(nodoid,:),E,v,T);
+    Kel = crearK(nodos(nodoid,:),E,v,T,v3_el);
 
     K(dir,dir)=K(dir,dir) + Kel;
 end
@@ -77,7 +77,7 @@ borde_CD = abs(nodos(:,2)) <1e-6; %y = 0
 borde_AB = abs(nodos(:,2) - L/2) <1e-6; %y = L/2
 
 
-free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z y giro_y) 5
+free(dofs(borde_CD,[1 3 5])) = false; %es rigida la pared (x, z) y giro_y 5
 free(dofs(borde_AC,sym_yz)) = false; %sym (mov en x, giro en y z) 6
 free(dofs(borde_AB,sym_xz)) = false; %sym (mov y, giro en x y z) 6
 
@@ -89,8 +89,9 @@ for i=1:nelem
     nodoid = elems(i,:);
     dir = dofs(nodoid,:);
     dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
-    %Ae = area(nodos(nodoid,:));
-    Ae = Volumen_degenerado(nodos(nodoid,:),T');
+    Ae = area(nodos(nodoid,:));
+    %Ve = Volumen_degenerado(nodos(nodoid,:),T');
+    %Ae = Ve/t; %se puede hacer con area() y da lo mismo
     
     dir = dir(3:dofselem:4*dofselem); % Carga solamente en z
 
@@ -126,7 +127,37 @@ draw_Mesh(elems,nodos_deformada,'Type','Q4','Color','k')
 hold off
 
 %% Valores del benchmark
-wB = U(dofs(nnod,3)) %el ultimo nodo en z
+wB = U(dofs(nnod,3)); %el ultimo nodo en z
+
+%% Tensiones
+
+esfuerzos = zeros(nelem,7); %Nx, Ny, Mx, My, Mxy, Qx, Qy
+for i = 1:nelem
+    nodoid = elems(i,:);
+
+    dir = dofs(nodoid,:);
+    dir = reshape(dir', 1, []); %para que sea un vector leyendo primero columnas
+
+    Coord = nodos(nodoid,:);
+    v3_el = v3(:,nodoid);
+    
+    Uel = U(dir);
+    
+    %esfuerzos(i,:) = stress_shellMQ4(Coord, Uel, E,v,t);
+    esfuerzos(i,:) = stress_shell_degenerado(Coord, Uel, E,v,T,v3_el);
+end
+
+% plotear en linea AB
+dir = div:div:nelem; %son los ultimos elementos de cada fila
+Nx_p = esfuerzos(dir,2); %x' es y en el eje de cordenadas mio
+My_p = esfuerzos(dir,3); %y' es x en el eje de cordenadas mio
+Qy_p = esfuerzos(dir,6);
+% figure(5)
+% plot(Nx_p)
+% figure(6)
+% plot(My_p)
+% figure(7)
+% plot(Qy_p)
 
 %% Funciones
 

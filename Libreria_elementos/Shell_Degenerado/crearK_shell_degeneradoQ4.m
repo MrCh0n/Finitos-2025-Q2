@@ -91,7 +91,6 @@ for i = 1:n
 
     J = [ dN*(nodos + zeta*v3t/2)
              N*(v3t)/2 ];
-    dN*(nodos + zeta*v3t/2);
 
     invJ = J\eye(3);
 

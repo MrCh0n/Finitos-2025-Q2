@@ -24,6 +24,7 @@ cant_puntos = 6;
 x1 = [0; 1; 0; 0.5; 0.5; 0];
 y1 = [0; 0; 1; 0; 0.5; 0.5];
 A = [ones(cant_puntos,1) x1 y1 x1.*y1 x1.^2 y1.^2];
+A = inv(A);
 
 %N = [1 x y x.*y x.^2 y.^2]/A;
 %% Gauss
@@ -41,8 +42,8 @@ K = 0;
     dir1 = 1:2:2*cant_puntos;
     dir2 = 2:2:2*cant_puntos;
 for i = 1:orden
-    Neta = [0, 1, 0, puntos(i,2), 2*puntos(i,1), 0]/A;
-    Nzeta = [0, 0, 1, puntos(i,1), 0, 2*puntos(i,2)]/A;
+    Neta = [0, 1, 0, puntos(i,2), 2*puntos(i,1), 0]*A;
+    Nzeta = [0, 0, 1, puntos(i,1), 0, 2*puntos(i,2)]*A;
     
     D = [Neta; Nzeta];
 
