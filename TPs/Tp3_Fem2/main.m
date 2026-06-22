@@ -1,6 +1,6 @@
 clc
 clear
-%close all
+close all
 
 addpath(genpath(pwd+"/Q4"))
 addpath(genpath(pwd+"/General_2D"))
@@ -148,6 +148,7 @@ S = 1/M+alpha^2/Eedo;
 cv=k/mu_f/S;
 
 tiempos = ceil([1/6,0.5,1]*nt);
+%tiempos = [1 tiempos];
 
 for j = 1:divy+1
 analitico_P = zeros(1,nt);
@@ -180,11 +181,15 @@ hold on
 for i = 1:size(tiempos,2)
     plot(alturas,P_altura(:,i),'b-*')
     hold on
-    plot(alturas,a_P(:,i),'k-*')
+    plot(alturas,a_P(:,i),'k-o')
+
+    text(alturas(ceil(end/2)), a_P(ceil(end/2),i)+40, ...
+         sprintf('t = %.2f s', tiempos(i)*dt ), ...
+         'Color', 'k')
 end
 xlabel('Altura [m]')
 ylabel('Presión de poros [Pa]')
-title('Consolidación unidimensional: comparación numérica vs analítica')
+title('Comparación numérica vs analítica')
 
 legend('Numérico (FEM)', 'Analítico (Terzaghi)', 'Location', 'best')
 grid on
@@ -199,7 +204,7 @@ for i = 1:size(tiempos,2)
 end
 xlabel('Altura [m]')
 ylabel('Desplazamiento [m]')
-title('Consolidación unidimensional: comparación numérica vs analítica')
+title('Comparación numérica vs analítica')
 
 legend('Numérico (FEM)', 'Analítico (Terzaghi)', 'Location', 'best')
 grid on
