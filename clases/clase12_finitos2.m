@@ -6,6 +6,7 @@ addpath(genpath(pwd+"/../Libreria_elementos"))
 %% Datos
 L = 30e-3;%m
 W = L;%m
+r = 10e-3;
 
 E = 10e9;%Gpa
 v = 0.3;
@@ -50,9 +51,10 @@ parte_superior = dofs(bordes.lado_34,2);%y de los nodos superiores
 nlag = size(parte_superior,1);
 free_lag = true(1,nlag);
 G = zeros(ndof,nlag);
-profundidad = 0;
+profundidad = 8e-3;
 for i = 1:nlag
     G(parte_superior(i), i) = -1;
+    abs(nodos(bordes.lado_34(i),1)-L/2)
     if abs(nodos(bordes.lado_34(i),1)-L/2)>profundidad
         free_lag(i) = false;
     end
@@ -61,6 +63,7 @@ end
 R = zeros(ndof,1);
 R(parte_superior([ceil(end/2) ceil(end/2)-1 ceil(end/2)+1])) = -F/3;
 g = zeros(nlag,1);
+g(free_lag) = profundidad-(nodos(bordes.lado_34(free_lag),1)-L/2).^2/(2*r);
 %% Calculo
 frees = [free, free_lag];
 
